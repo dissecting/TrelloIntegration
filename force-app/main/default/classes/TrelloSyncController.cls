@@ -1,161 +1,172 @@
 public with sharing class TrelloSyncController {
-    public static Map<String, List<String>> getBoards() {
-        Map<String, List<String>> boardsMap = new Map<String, List<String>>();
-        String endPoint = 'https://api.trello.com/1/members/{0}/boards?key={1}&token={2}';
+
+    private static List<Object> sendGetRequest(String primaryParameter, String primaryValue, String secondaryParameter, String objectName) {
+        List<TrelloBoard> boardList = new List<TrelloBoard>();
+        List<TrelloColumn> columnList = new List<TrelloColumn>();
+        List<TrelloUser> userList = new List<TrelloUser>();
+        List<TrelloCard> cardList = new List<TrelloCard>();
+        List<Object> objectList = new List<Object>();
+        String endPoint = 'https://api.trello.com/1/{0}/{1}/{2}?key={3}&token={4}';
         String apiKey = TrelloSyncController.getTrelloSettings().get('apiKey');
         String tokenValue = TrelloSyncController.getTrelloSettings().get('tokenValue');
-        String userName = TrelloSyncController.getTrelloSettings().get('userName');
         Http http = new Http();
         HttpRequest request = new HttpRequest();
 
-        request.setEndpoint(String.format(endPoint, new List<String> { userName, apiKey, tokenValue }));
+        request.setEndpoint(String.format(endPoint, new List<String> {
+            primaryParameter,
+            primaryValue,
+            secondaryParameter,
+            apiKey,
+            tokenValue
+        }));
         request.setMethod('GET');
 
         HttpResponse response = http.send(request);
 
         if (response.getStatusCode() == 200 && String.isNotBlank(response.getBody())) {
-            List<Object> results = (List<Object>) JSON.deserializeUntyped(response.getBody());
-
-            for (Object obj : results) {
-                Map<String, Object> objMap = (Map<String, Object>) obj;
-
-                boardsMap.put(
-                    String.valueOf(objMap.get('url')),
-                    new List<String> { String.valueOf(objMap.get('id')), String.valueOf(objMap.get('name')) }
-                );
-            }
-        }
-
-        return boardsMap;
-    }
-
-    public static Map<String, List<String>> getLists() {
-        Map<String, List<String>> boardsMap = TrelloSyncController.getBoards();
-        Map<String, List<String>> listsMap = new Map<String, List<String>>();
-        String endPoint = 'https://api.trello.com/1/boards/{0}/lists?key={1}&token={2}';
-        String apiKey = TrelloSyncController.getTrelloSettings().get('apiKey');
-        String tokenValue = TrelloSyncController.getTrelloSettings().get('tokenValue');
-        String boardUrl = TrelloSyncController.getTrelloSettings().get('boardUrl');
-        String boardId = boardsMap.get(boardUrl)[0];
-        Integer listPosition = 0;
-        Http http = new Http();
-        HttpRequest request = new HttpRequest();
-
-        request.setEndpoint(String.format(endPoint, new List<String> { boardId, apiKey, tokenValue }));
-        request.setMethod('GET');
-
-        HttpResponse response = http.send(request);
-
-        if (response.getStatusCode() == 200 && String.isNotBlank(response.getBody())) {
-            List<Object> results = (List<Object>) JSON.deserializeUntyped(response.getBody());
-
-            for (Object obj : results) {
-                Map<String, Object> objMap = (Map<String, Object>) obj;
-
-                listsMap.put(
-                    String.valueOf(listPosition),
-                    new List<String> {
-                        String.valueOf(objMap.get('id')),
-                        String.valueOf(objMap.get('name')),
-                        String.valueOf(objMap.get('idBoard'))
-                    }
-                );
-                listPosition++;
-            }
-        }
-
-        return listsMap;
-    }
-
-    public static List<Map<String, List<String>>> getUsers() {
-        List<Map<String, List<String>>> userList = new List<Map<String, List<String>>>();
-        Map<String, List<String>> listsMap = TrelloSyncController.getLists();
-        Map<String, List<String>> usersMap = new Map<String, List<String>>();
-        String endPoint = 'https://api.trello.com/1/boards/{0}/members?key={1}&token={2}';
-        String apiKey = TrelloSyncController.getTrelloSettings().get('apiKey');
-        String tokenValue = TrelloSyncController.getTrelloSettings().get('tokenValue');
-        String boardId = listsMap.get('0')[2];
-        Http http = new Http();
-        HttpRequest request = new HttpRequest();
-
-        request.setEndpoint(String.format(endPoint, new List<String> { boardId, apiKey, tokenValue }));
-        request.setMethod('GET');
-
-        HttpResponse response = http.send(request);
-
-        if (response.getStatusCode() == 200 && String.isNotBlank(response.getBody())) {
-            List<Object> results = (List<Object>) JSON.deserializeUntyped(response.getBody());
-
-            for (Object obj : results) {
-                Map<String, Object> objMap = (Map<String, Object>) obj;
-
-                usersMap.put(String.valueOf(objMap.get('id')), new List<String> {
-                    String.valueOf(objMap.get('username'))
-                });
-            }
-
-            userList.add(listsMap);
-            userList.add(usersMap);
-        }
-
-        return userList;
-    }
-
-    public static Map<String, List<String>> getCards() {
-        List<Map<String, List<String>>> userList = TrelloSyncController.getUsers();
-        Map<String, List<String>> listsMap = userList[0];
-        Map<String, List<String>> usersMap = userList[1];
-        Map<String, List<String>> cardsMap = new Map<String, List<String>>();
-        Map<String, List<String>> positionsByIdMap = new Map<String, List<String>>();
-        String endPoint = 'https://api.trello.com/1/boards/{0}/cards?key={1}&token={2}';
-        String apiKey = TrelloSyncController.getTrelloSettings().get('apiKey');
-        String tokenValue = TrelloSyncController.getTrelloSettings().get('tokenValue');
-        String boardId = listsMap.get('0')[2];
-        Integer cardPosition = 0;
-        Http http = new Http();
-        HttpRequest request = new HttpRequest();
-
-        request.setEndpoint(String.format(endPoint, new List<String> { boardId, apiKey, tokenValue }));
-        request.setMethod('GET');
-
-        HttpResponse response = http.send(request);
-
-        if (response.getStatusCode() == 200 && String.isNotBlank(response.getBody())) {
-            List<Object> results = (List<Object>) JSON.deserializeUntyped(response.getBody());
-
-            for (String listKey : listsMap.keySet()) {
-                positionsByIdMap.put(
-                    listsMap.get(listKey)[0],
-                    new List<String> { String.valueOf(listKey), listsMap.get(listKey)[1]}
-                );
-            }
-
-            for (Object obj : results) {
-                Map<String, Object> objMap = (Map<String, Object>) obj;
-                String idList = String.valueOf(objMap.get('idList'));
-                List<Object> idMemberList = (List<Object>) objMap.get('idMembers');
-                List<String> userNameList = new List<String>();
-
-                for (Object idUser : idMemberList) {
-                    userNameList.add(usersMap.get(String.valueOf(idUser))[0]);
+            switch on objectName {
+                when 'TrelloBoard' {
+                    boardList = (List<TrelloBoard>) JSON.deserialize(response.getBody(), List<TrelloBoard>.class);
+                    objectList = (List<Object>) boardList;
                 }
-
-                cardsMap.put(
-                    positionsByIdMap.get(idList)[0] + '-' + String.valueOf(cardPosition),
-                    new List<String> {
-                        String.valueOf(objMap.get('name')),
-                        String.valueOf(objMap.get('desc')),
-                        String.valueOf(objMap.get('due')),
-                        String.valueOf((Object) userNameList),
-                        positionsByIdMap.get(idList)[1]
-                    }
-                );
-
-                cardPosition++;
+                when 'TrelloColumn' {
+                    columnList = (List<TrelloColumn>) JSON.deserialize(response.getBody(), List<TrelloColumn>.class);
+                    objectList = (List<Object>) columnList;
+                }
+                when 'TrelloUser' {
+                    userList = (List<TrelloUser>) JSON.deserialize(response.getBody(), List<TrelloUser>.class);
+                    objectList = (List<Object>) userList;
+                }
+                when 'TrelloCard' {
+                    cardList = (List<TrelloCard>) JSON.deserialize(
+                        response.getBody().replaceAll('"desc":', '"descValue":'),
+                        List<TrelloCard>.class
+                    );
+                    objectList = (List<Object>) cardList;
+                }
+                when else {
+                    return objectList;
+                }
             }
         }
 
-        return cardsMap;
+        return objectList;
+    }
+
+    public static TrelloBoard getBoard() {
+        TrelloBoard newBoard = new TrelloBoard();
+        List<TrelloBoard> boardList = new List<TrelloBoard>();
+        String primaryParameter = 'members';
+        String secondaryParameter = 'boards';
+        String objectName = 'TrelloBoard';
+        String userName = TrelloSyncController.getTrelloSettings().get('userName');
+        String boardUrl = TrelloSyncController.getTrelloSettings().get('boardUrl');
+        String boardName = TrelloSyncController.getTrelloSettings().get('boardName');
+
+        boardList = (List<TrelloBoard>) TrelloSyncController.sendGetRequest(
+            primaryParameter,
+            userName,
+            secondaryParameter,
+            objectName
+        );
+
+        if (!boardList.isEmpty()) {
+            for (TrelloBoard currentBoard : boardList) {
+                if (currentBoard.url == boardUrl && currentBoard.name == boardName) {
+                    newBoard.id = currentBoard.id;
+                    newBoard.name = currentBoard.name;
+                    newBoard.url = currentBoard.url;
+                }
+            }
+        }
+
+        return newBoard;
+    }
+
+    public static List<TrelloColumn> getColumns() {
+        String boardId = TrelloSyncController.getBoard().id;
+        String primaryParameter = 'boards';
+        String secondaryParameter = 'lists';
+        String objectName = 'TrelloColumn';
+
+        return (List<TrelloColumn>) TrelloSyncController.sendGetRequest(
+            primaryParameter,
+            boardId,
+            secondaryParameter,
+            objectName
+        );
+    }
+
+    public static UsersWithColumns getUsersWithColumns() {
+        UsersWithColumns usersWithColumns = new UsersWithColumns();
+        List<TrelloUser> userList = new List<TrelloUser>();
+        List<TrelloColumn> columnList = TrelloSyncController.getColumns();
+        String primaryParameter = 'boards';
+        String secondaryParameter = 'members';
+        String objectName = 'TrelloUser';
+        String boardId;
+
+        if (!columnList.isEmpty()) {
+            boardId = columnList[0].idBoard;
+        }
+
+        userList = (List<TrelloUser>) TrelloSyncController.sendGetRequest(
+            primaryParameter,
+            boardId,
+            secondaryParameter,
+            objectName
+        );
+
+        if (!userList.isEmpty()) {
+            usersWithColumns.trelloUserList = userList;
+            usersWithColumns.trelloColumnList = columnList;
+        }
+
+        return usersWithColumns;
+    }
+
+    public static List<TrelloCard> getCards() {
+        UsersWithColumns usersWithColumns = TrelloSyncController.getUsersWithColumns();
+        Map<String, String> columnNameByIdMap = new Map<String, String>();
+        Map<String, String> userNameByIdMap = new Map<String, String>();
+        List<TrelloCard> cardList = new List<TrelloCard>();
+        String primaryParameter = 'boards';
+        String secondaryParameter = 'cards';
+        String objectName = 'TrelloCard';
+        String boardId;
+
+        if (!usersWithColumns.trelloColumnList.isEmpty()) {
+            boardId = usersWithColumns.trelloColumnList[0].idBoard;
+        }
+
+        cardList = (List<TrelloCard>) TrelloSyncController.sendGetRequest(
+            primaryParameter,
+            boardId,
+            secondaryParameter,
+            objectName
+        );
+
+        if (!cardList.isEmpty()) {
+
+            for (TrelloColumn currentColumn : usersWithColumns.trelloColumnList) {
+                columnNameByIdMap.put(currentColumn.id, currentColumn.name);
+            }
+
+            for (TrelloUser currentUser : usersWithColumns.trelloUserList) {
+                userNameByIdMap.put(currentUser.id, currentUser.username);
+            }
+
+            for (TrelloCard currentCard : cardList) {
+                currentCard.columnName = columnNameByIdMap.get(currentCard.idList);
+                currentCard.userNames = new List<String>();
+
+                for (String userId : currentCard.idMembers) {
+                    currentCard.userNames.add(userNameByIdMap.get(userId));
+                }
+            }
+        }
+
+        return cardList;
     }
 
     private static Map<String, String> getTrelloSettings() {
@@ -178,5 +189,38 @@ public with sharing class TrelloSyncController {
         }
 
         return trelloSettingsMap;
+    }
+
+    public class TrelloBoard {
+        public String id;
+        public String name;
+        public String url;
+    }
+
+    public class TrelloColumn {
+        public String id;
+        public String name;
+        public String idBoard;
+    }
+
+    public class TrelloUser {
+        public String id;
+        public String username;
+    }
+
+    public class UsersWithColumns {
+        public List<TrelloUser> trelloUserList;
+        public List<TrelloColumn> trelloColumnList;
+    }
+
+    public class TrelloCard {
+        public String id;
+        public String name;
+        public String descValue;
+        public String due;
+        public String idList;
+        public List<String> idMembers;
+        public String columnName;
+        public List<String> userNames;
     }
 }
