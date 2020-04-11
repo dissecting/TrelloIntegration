@@ -47,7 +47,7 @@ public with sharing class TrelloSyncController {
 
     public static TrelloBoard getBoard() {
         TrelloBoard newBoard = new TrelloBoard();
-        List<TrelloBoard> boardList = new List<TrelloBoard>();
+        List<Object> boardList = new List<Object>();
         String primaryParameter = 'members';
         String secondaryParameter = 'boards';
         String objectName = 'TrelloBoard';
@@ -55,18 +55,20 @@ public with sharing class TrelloSyncController {
         String boardUrl = TrelloSyncController.getTrelloSettings().get('boardUrl');
         String boardName = TrelloSyncController.getTrelloSettings().get('boardName');
 
-        boardList = (List<TrelloBoard>) TrelloSyncController.sendGetRequest(
+        boardList = TrelloSyncController.sendGetRequest(
             primaryParameter,
             userName,
             secondaryParameter,
             objectName
         );
 
-        for (TrelloBoard currentBoard : boardList) {
-            if (currentBoard.url == boardUrl && currentBoard.name == boardName) {
-                newBoard.id = currentBoard.id;
-                newBoard.name = currentBoard.name;
-                newBoard.url = currentBoard.url;
+        if (!boardList.isEmpty()) {
+            for (TrelloBoard currentBoard : (List<TrelloBoard>) boardList) {
+                if (currentBoard.url == boardUrl && currentBoard.name == boardName) {
+                    newBoard.id = currentBoard.id;
+                    newBoard.name = currentBoard.name;
+                    newBoard.url = currentBoard.url;
+                }
             }
         }
 
@@ -74,17 +76,22 @@ public with sharing class TrelloSyncController {
     }
 
     public static List<TrelloColumn> getColumns() {
-        String boardId = TrelloSyncController.getBoard().id;
+        List<TrelloColumn> columnList = new List<TrelloColumn>();
+        TrelloBoard trelloBoard = TrelloSyncController.getBoard();
         String primaryParameter = 'boards';
         String secondaryParameter = 'lists';
         String objectName = 'TrelloColumn';
 
-        return (List<TrelloColumn>) TrelloSyncController.sendGetRequest(
-            primaryParameter,
-            boardId,
-            secondaryParameter,
-            objectName
-        );
+        if (trelloBoard.id != null) {
+            columnList = (List<TrelloColumn>) TrelloSyncController.sendGetRequest(
+                primaryParameter,
+                trelloBoard.id,
+                secondaryParameter,
+                objectName
+            );
+        }
+
+        return columnList;
     }
 
     public static UsersWithColumns getUsersWithColumns() {
@@ -94,18 +101,16 @@ public with sharing class TrelloSyncController {
         String primaryParameter = 'boards';
         String secondaryParameter = 'members';
         String objectName = 'TrelloUser';
-        String boardId;
 
         if (!columnList.isEmpty()) {
-            boardId = columnList[0].idBoard;
+            userList = (List<TrelloUser>) TrelloSyncController.sendGetRequest(
+                primaryParameter,
+                columnList[0].idBoard,
+                secondaryParameter,
+                objectName
+            );
         }
 
-        userList = (List<TrelloUser>) TrelloSyncController.sendGetRequest(
-            primaryParameter,
-            boardId,
-            secondaryParameter,
-            objectName
-        );
         usersWithColumns.trelloUserList = userList;
         usersWithColumns.trelloColumnList = columnList;
 
@@ -120,35 +125,32 @@ public with sharing class TrelloSyncController {
         String primaryParameter = 'boards';
         String secondaryParameter = 'cards';
         String objectName = 'TrelloCard';
-        String boardId;
 
         if (!usersWithColumns.trelloColumnList.isEmpty()) {
-            boardId = usersWithColumns.trelloColumnList[0].idBoard;
-        }
+            cardList = (List<TrelloCard>) TrelloSyncController.sendGetRequest(
+                primaryParameter,
+                usersWithColumns.trelloColumnList[0].idBoard,
+                secondaryParameter,
+                objectName
+            );
 
-        cardList = (List<TrelloCard>) TrelloSyncController.sendGetRequest(
-            primaryParameter,
-            boardId,
-            secondaryParameter,
-            objectName
-        );
+            if (!cardList.isEmpty()) {
 
-        if (!cardList.isEmpty()) {
+                for (TrelloColumn currentColumn : usersWithColumns.trelloColumnList) {
+                    columnNameByIdMap.put(currentColumn.id, currentColumn.name);
+                }
 
-            for (TrelloColumn currentColumn : usersWithColumns.trelloColumnList) {
-                columnNameByIdMap.put(currentColumn.id, currentColumn.name);
-            }
+                for (TrelloUser currentUser : usersWithColumns.trelloUserList) {
+                    userNameByIdMap.put(currentUser.id, currentUser.username);
+                }
 
-            for (TrelloUser currentUser : usersWithColumns.trelloUserList) {
-                userNameByIdMap.put(currentUser.id, currentUser.username);
-            }
+                for (TrelloCard currentCard : cardList) {
+                    currentCard.columnName = columnNameByIdMap.get(currentCard.idList);
+                    currentCard.userNames = new List<String>();
 
-            for (TrelloCard currentCard : cardList) {
-                currentCard.columnName = columnNameByIdMap.get(currentCard.idList);
-                currentCard.userNames = new List<String>();
-
-                for (String userId : currentCard.idMembers) {
-                    currentCard.userNames.add(userNameByIdMap.get(userId));
+                    for (String userId : currentCard.idMembers) {
+                        currentCard.userNames.add(userNameByIdMap.get(userId));
+                    }
                 }
             }
         }
