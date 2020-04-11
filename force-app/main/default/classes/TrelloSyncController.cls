@@ -1,10 +1,6 @@
 public with sharing class TrelloSyncController {
 
     private static List<Object> sendGetRequest(String primaryParameter, String primaryValue, String secondaryParameter, String objectName) {
-        List<TrelloBoard> boardList = new List<TrelloBoard>();
-        List<TrelloColumn> columnList = new List<TrelloColumn>();
-        List<TrelloUser> userList = new List<TrelloUser>();
-        List<TrelloCard> cardList = new List<TrelloCard>();
         List<Object> objectList = new List<Object>();
         String endPoint = 'https://api.trello.com/1/{0}/{1}/{2}?key={3}&token={4}';
         String apiKey = TrelloSyncController.getTrelloSettings().get('apiKey');
@@ -26,23 +22,19 @@ public with sharing class TrelloSyncController {
         if (response.getStatusCode() == 200 && String.isNotBlank(response.getBody())) {
             switch on objectName {
                 when 'TrelloBoard' {
-                    boardList = (List<TrelloBoard>) JSON.deserialize(response.getBody(), List<TrelloBoard>.class);
-                    objectList = (List<Object>) boardList;
+                    objectList = (List<Object>) JSON.deserialize(response.getBody(), List<TrelloBoard>.class);
                 }
                 when 'TrelloColumn' {
-                    columnList = (List<TrelloColumn>) JSON.deserialize(response.getBody(), List<TrelloColumn>.class);
-                    objectList = (List<Object>) columnList;
+                    objectList = (List<Object>) JSON.deserialize(response.getBody(), List<TrelloColumn>.class);
                 }
                 when 'TrelloUser' {
-                    userList = (List<TrelloUser>) JSON.deserialize(response.getBody(), List<TrelloUser>.class);
-                    objectList = (List<Object>) userList;
+                    objectList = (List<Object>) JSON.deserialize(response.getBody(), List<TrelloUser>.class);
                 }
                 when 'TrelloCard' {
-                    cardList = (List<TrelloCard>) JSON.deserialize(
+                    objectList = (List<Object>) JSON.deserialize(
                         response.getBody().replaceAll('"desc":', '"descValue":'),
                         List<TrelloCard>.class
                     );
-                    objectList = (List<Object>) cardList;
                 }
                 when else {
                     return objectList;
@@ -70,13 +62,11 @@ public with sharing class TrelloSyncController {
             objectName
         );
 
-        if (!boardList.isEmpty()) {
-            for (TrelloBoard currentBoard : boardList) {
-                if (currentBoard.url == boardUrl && currentBoard.name == boardName) {
-                    newBoard.id = currentBoard.id;
-                    newBoard.name = currentBoard.name;
-                    newBoard.url = currentBoard.url;
-                }
+        for (TrelloBoard currentBoard : boardList) {
+            if (currentBoard.url == boardUrl && currentBoard.name == boardName) {
+                newBoard.id = currentBoard.id;
+                newBoard.name = currentBoard.name;
+                newBoard.url = currentBoard.url;
             }
         }
 
@@ -116,11 +106,8 @@ public with sharing class TrelloSyncController {
             secondaryParameter,
             objectName
         );
-
-        if (!userList.isEmpty()) {
-            usersWithColumns.trelloUserList = userList;
-            usersWithColumns.trelloColumnList = columnList;
-        }
+        usersWithColumns.trelloUserList = userList;
+        usersWithColumns.trelloColumnList = columnList;
 
         return usersWithColumns;
     }
