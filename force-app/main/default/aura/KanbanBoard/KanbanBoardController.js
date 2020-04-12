@@ -1,16 +1,6 @@
 ({
     doInit: function(component, event, helper) {
-        var action = component.get("c.getKanbanBoard");
-
-        action.setCallback(this, function(response){
-            var state = response.getState();
-
-            if (state === "SUCCESS") {
-                component.set("v.kanbanData", response.getReturnValue());
-            }
-        });
-
-        $A.enqueueAction(action);
+        helper.handleInit(component);
     },
 
     doView: function(component, event, helper) {
