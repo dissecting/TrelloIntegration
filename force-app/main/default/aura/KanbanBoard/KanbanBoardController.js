@@ -16,22 +16,26 @@
         event.preventDefault();
     },
 
-    drag: function (component, event, helper) {
+    doDrag: function (component, event, helper) {
         event.dataTransfer.setData("text", event.target.id);
     },
 
-    drop: function (component, event, helper) {
+    doDrop: function (component, event, helper) {
         event.preventDefault();
 
         var data = event.dataTransfer.getData("text");
-        var tar = event.target;
+        var targetEvent = event.target;
 
-        while (tar.tagName != "ul" && tar.tagName != "UL") {
-            tar = tar.parentElement;
+        while (targetEvent.tagName != "ul" && targetEvent.tagName != "UL") {
+            targetEvent = targetEvent.parentElement;
         }
 
-        tar.appendChild(document.getElementById(data));
-        document.getElementById(data).style.backgroundColor = "#ffb75d";
-        helper.updatePickVal(component, data, tar.getAttribute("data-status"), tar.getAttribute("data-index"));
+        targetEvent.appendChild(document.getElementById(data));
+        helper.updateStatus(
+            component,
+            data,
+            targetEvent.getAttribute("data-status"),
+            targetEvent.getAttribute("data-index")
+        );
     }
 })

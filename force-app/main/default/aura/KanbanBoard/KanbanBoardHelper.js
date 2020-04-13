@@ -13,7 +13,7 @@
         $A.enqueueAction(action);
     },
 
-    updatePickVal : function(component, recId, statusValue, indexValue) {
+    updateStatus : function(component, recId, statusValue, indexValue) {
         var action = component.get("c.getUpdateStatus");
 
         action.setParams({

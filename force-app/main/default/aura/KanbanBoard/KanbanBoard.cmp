@@ -27,7 +27,7 @@
                         </div>
                     </div>
                 </div>
-                <ul ondrop="{!c.drop}"
+                <ul ondrop="{!c.doDrop}"
                     ondragover="{!c.allowDrop}"
                     class="slds-has-dividers_around-space dropZone"
                     data-status="{!status}"
@@ -35,7 +35,7 @@
                     style="height:70vh;overflow-y:auto;">
                     <aura:iteration var="objRecord" items="{!v.kanbanData.cardList}">
                         <aura:if isTrue="{!status == objRecord.Status__c}">
-                            <li class="slds-item slds-m-around_small" draggable="true" ondragstart="{!c.drag}" id="{!objRecord.Id}">
+                            <li class="slds-item slds-m-around_small" draggable="true" ondragstart="{!c.doDrag}" id="{!objRecord.Id}">
                                 <article class="slds-tile slds-tile_board">
                                     <h3 class="slds-truncate" title="{!objRecord.Name}">
                                         <a href="javascript:void(0);" onclick="{!c.doView}">
