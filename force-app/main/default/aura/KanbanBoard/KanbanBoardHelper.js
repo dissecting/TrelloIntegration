@@ -13,21 +13,23 @@
         $A.enqueueAction(action);
     },
 
-    updateStatus : function(component, recId, statusValue, indexValue) {
+    updateStatus : function(component, recordId, statusValue, position) {
         var action = component.get("c.getUpdateStatus");
 
         action.setParams({
-            "recordId": recId,
+            "recordId": recordId,
             "status": statusValue,
-            "position": indexValue
+            "position": position
         });
 
         action.setCallback(this, function(response){
             var state = response.getState();
 
             if (state === "SUCCESS") {
-                document.getElementById(recId).style.backgroundColor = "#04844b";
-                setTimeout(function(){ document.getElementById(recId).style.backgroundColor = ""; }, 300);
+                document.getElementById(recordId).style.backgroundColor = "#04844b";
+                setTimeout(function() {
+                    document.getElementById(recordId).style.backgroundColor = "";
+                }, 300);
             }
         });
 

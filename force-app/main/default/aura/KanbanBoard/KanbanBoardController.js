@@ -12,30 +12,23 @@
         editRecordEvent.fire();
     },
 
-    allowDrop: function(component, event, helper) {
-        event.preventDefault();
-    },
+    onRender : function(component, event, helper) {
+        var statusList = component.get("v.kanbanData.statusList");
+        var elements = [];
 
-    doDrag: function (component, event, helper) {
-        event.dataTransfer.setData("text", event.target.id);
-    },
+        if (statusList) {
+            for (var i = 0; i < statusList.length; i++) {
+                elements.push(document.getElementById(i));
+            }
 
-    doDrop: function (component, event, helper) {
-        event.preventDefault();
-
-        var data = event.dataTransfer.getData("text");
-        var targetEvent = event.target;
-
-        while (targetEvent.tagName != "ul" && targetEvent.tagName != "UL") {
-            targetEvent = targetEvent.parentElement;
+            dragula(elements).on("drop", function(el, target) {
+                helper.updateStatus(
+                    component,
+                    el.id,
+                    target.getAttribute("data-status"),
+                    target.id
+                );
+            });
         }
-
-        targetEvent.appendChild(document.getElementById(data));
-        helper.updateStatus(
-            component,
-            data,
-            targetEvent.getAttribute("data-status"),
-            targetEvent.getAttribute("data-index")
-        );
     }
 })

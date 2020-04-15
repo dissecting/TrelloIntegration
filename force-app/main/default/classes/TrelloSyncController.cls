@@ -177,28 +177,36 @@ public with sharing class TrelloSyncController {
         List<Card__c> availableCardList = [
             SELECT Card_Id__c
             FROM Card__c
-            WHERE Card_Id__c != null
         ];
 
+        Integer cardPosition = 0;
         Set<String> cardIds = new Set<String>();
 
         for (Card__c currentCard : availableCardList) {
             cardIds.add(currentCard.Card_Id__c);
         }
 
-        for (TrelloCard card : TrelloSyncController.getCards(cardIds)) {
+        List<TrelloCard> trelloCardList = TrelloSyncController.getCards(cardIds);
+
+        for (Integer i = 0; i < trelloCardList.size(); i++) {
+            if (i != 0 && (trelloCardList[i].columnPosition != trelloCardList[i-1].columnPosition)) {
+                cardPosition = 0;
+            }
+
             Card__c newCard = new Card__c(
-                Card_Id__c = card.id,
-                Name = card.name,
-                Description__c = card.descValue,
-                Assignee__c = String.join(card.userNames, ', '),
-                Due_Date__c = card.due,
-                Status__c = card.columnName,
-                Status_Id__c = card.idList,
-                StatusPosition__c = card.columnPosition
+                Card_Id__c = trelloCardList[i].id,
+                Name = trelloCardList[i].name,
+                Description__c = trelloCardList[i].descValue,
+                Assignee__c = String.join(trelloCardList[i].userNames, ', '),
+                Due_Date__c = trelloCardList[i].due,
+                Status__c = trelloCardList[i].columnName,
+                Status_Id__c = trelloCardList[i].idList,
+                StatusPosition__c = trelloCardList[i].columnPosition,
+                Card_Position__c = String.valueOf(trelloCardList[i].columnPosition) + String.valueOf(cardPosition)
             );
 
             cardList.add(newCard);
+            cardPosition++;
         }
 
         insert cardList;

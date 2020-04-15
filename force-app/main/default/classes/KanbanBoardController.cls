@@ -12,9 +12,10 @@ public with sharing class KanbanBoardController {
 
         List<String> statuses = new List<String>();
         List<Card__c> availableCardList = [
-            SELECT Name, Description__c, Assignee__c, Due_Date__c, Status__c, Status_Id__c, StatusPosition__c
+            SELECT Name, Description__c, Assignee__c, Due_Date__c,
+                Status__c, Status_Id__c, StatusPosition__c, Card_Position__c
             FROM Card__c
-            ORDER BY StatusPosition__c
+            ORDER BY StatusPosition__c, Card_Position__c, LastModifiedDate
         ];
 
         for (Trello_Status_Setting__mdt status : statusList) {
@@ -25,10 +26,10 @@ public with sharing class KanbanBoardController {
     }
 
     @AuraEnabled
-    public static void getUpdateStatus(Id recordId, String status, Integer position) {
+    public static void getUpdateStatus(Id recordId, String status, Integer statusPosition) {
         SObject card = recordId.getSObjectType().newSObject(recordId);
         card.put('Status__c', status);
-        card.put('StatusPosition__c', position);
+        card.put('StatusPosition__c', statusPosition);
 
         update card;
     }

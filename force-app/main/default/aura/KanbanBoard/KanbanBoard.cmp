@@ -1,22 +1,14 @@
 <aura:component controller="KanbanBoardController" implements="flexipage:availableForAllPageTypes" access="global">
-    <ltng:require styles="{!$Resource.materialize + '/materialize/css/materialize.css'}"/>
+    <ltng:require styles="{!join(',',
+                    $Resource.materialize + '/materialize/css/materialize.css',
+                    $Resource.dragula + '/dragula/dragula.css')}"/>
+    <ltng:require scripts="{!$Resource.dragula + '/dragula/dragula.js'}"/>
 
     <aura:attribute name="kanbanData" type="KanbanBoardController.KanbanBoard"/>
 
     <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="render" value="{!this}" action="{!c.onRender}"/>
 
-    <div class="slds-page-header">
-        <div class="slds-media">
-            <div class="slds-media__figure">
-                <span class="slds-icon_container" title="Description of icon when needed">
-                    <lightning:icon iconName="utility:kanban" variant="bare" size="small"/>
-                </span>
-            </div>
-            <div class="slds-media__body">
-                <h1 class="slds-page-header__title slds-truncate slds-align-middle" title="Kanban">Kanban</h1>
-            </div>
-        </div>
-    </div>
     <div style="padding:0.5rem;">
         <aura:iteration var="status" items="{!v.kanbanData.statusList}" indexVar="index">
             <div class="stageContainer">
@@ -27,15 +19,14 @@
                         </div>
                     </div>
                 </div>
-                <ul ondrop="{!c.doDrop}"
-                    ondragover="{!c.allowDrop}"
+                <ul id="{!index}"
                     class="slds-has-dividers_around-space dropZone"
                     data-status="{!status}"
-                    data-index="{!index}"
                     style="height:70vh;overflow-y:auto;">
-                    <aura:iteration var="objRecord" items="{!v.kanbanData.cardList}">
+                    &nbsp;
+                    <aura:iteration var="objRecord" items="{!v.kanbanData.cardList}" indexVar="indexCard">
                         <aura:if isTrue="{!status == objRecord.Status__c}">
-                            <li class="slds-item slds-m-around_small" draggable="true" ondragstart="{!c.doDrag}" id="{!objRecord.Id}">
+                            <li class="slds-item slds-m-around_small" id="{!objRecord.Id}">
                                 <article class="slds-tile slds-tile_board">
                                     <h3 class="slds-truncate" title="{!objRecord.Name}">
                                         <a href="javascript:void(0);" onclick="{!c.doView}">
