@@ -7,32 +7,76 @@
 
             if (state === "SUCCESS") {
                 component.set("v.kanbanData", response.getReturnValue());
+            } else if (state === "ERROR") {
+                var errors = response.getError();
+
+                this.handleShowToast(component, state, errors[0].message);
             }
         });
 
         $A.enqueueAction(action);
     },
 
-    updateStatus : function(component, recordId, statusValue, position) {
-        var action = component.get("c.getUpdateStatus");
+    handleSync: function(component) {
+        var preloader = component.find("preloader");
 
-        action.setParams({
-            "recordId": recordId,
-            "status": statusValue,
-            "position": position
-        });
+        component.set("v.isSync", true);
+        $A.util.removeClass(preloader, "in-progress");
+        $A.util.addClass(preloader, "progress");
+
+        var action = component.get("c.getSync");
 
         action.setCallback(this, function(response){
             var state = response.getState();
 
             if (state === "SUCCESS") {
-                document.getElementById(recordId).style.backgroundColor = "#04844b";
-                setTimeout(function() {
-                    document.getElementById(recordId).style.backgroundColor = "";
-                }, 300);
+                var msgSuccess = "Sync completed successfully";
+
+                this.handleShowToast(component, state, msgSuccess);
+                this.handleInit(component);
+                component.set("v.isSync", false);
+                $A.util.removeClass(preloader, "progress");
+                $A.util.addClass(preloader, "in-progress");
+            } else if (state === "ERROR") {
+                var errors = response.getError();
+
+                this.handleShowToast(component, state, errors[0].message);
             }
         });
 
         $A.enqueueAction(action);
-	}
+    },
+
+    handleUpdateStatus : function(component, statusValue, position, cardIds) {
+        var action = component.get("c.getUpdateStatus");
+
+        action.setParams({
+            "status": statusValue,
+            "statusPosition": position,
+            "cardIds" : cardIds.join(",")
+        });
+
+        action.setCallback(this, function(response){
+            var state = response.getState();
+
+            if (state === "ERROR") {
+                var errors = response.getError();
+
+                this.handleShowToast(component, state, errors[0].message);
+            }
+        });
+
+        $A.enqueueAction(action);
+    },
+
+    handleShowToast: function(component, msgType, msg) {
+        var toastEvent = $A.get("e.force:showToast");
+
+        toastEvent.setParams({
+            "title": msgType === "SUCCESS" ? "Success!": "Error!",
+            "type": msgType === "SUCCESS" ? "success": "error",
+            "message": msg
+        });
+        toastEvent.fire();
+    },
 })

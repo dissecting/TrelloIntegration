@@ -2,7 +2,7 @@ public with sharing class TrelloSyncController {
 
     private static List<Object> sendGetRequest(String primaryParameter, String primaryValue, String secondaryParameter, String objectName) {
         List<Object> objectList = new List<Object>();
-        String endPoint = 'https://api.trello.com/1/{0}/{1}/{2}?key={3}&token={4}';
+        String endPoint = Label.Trello_Sync_Endpoint;
         String apiKey = TrelloSyncController.getTrelloSettings().get('apiKey');
         String tokenValue = TrelloSyncController.getTrelloSettings().get('tokenValue');
         Http http = new Http();
@@ -127,6 +127,8 @@ public with sharing class TrelloSyncController {
         UsersWithColumns usersWithColumns = TrelloSyncController.getUsersWithColumns();
         Map<String, String> columnNameByIdMap = new Map<String, String>();
         Map<String, Integer> columnPositionByIdMap = new Map<String, Integer>();
+        Map<Integer, String> statusNameByPositionMap = new Map<Integer, String>();
+        Map<String, Integer> statusPositionByNameMap = new Map<String, Integer>();
         Map<String, String> userNameByIdMap = new Map<String, String>();
         List<TrelloCard> cardList = new List<TrelloCard>();
         List<TrelloCard> cardNewList = new List<TrelloCard>();
@@ -143,6 +145,16 @@ public with sharing class TrelloSyncController {
             );
 
             if (!cardList.isEmpty()) {
+                List<Trello_Status_Setting__mdt> statusList = [
+                    SELECT Position__c, Status__c
+                    FROM Trello_Status_Setting__mdt
+                    ORDER BY Position__c
+                ];
+
+                for (Trello_Status_Setting__mdt statusSetting : statusList) {
+                    statusNameByPositionMap.put((Integer) statusSetting.Position__c, statusSetting.Status__c);
+                    statusPositionByNameMap.put(statusSetting.Status__c, (Integer) statusSetting.Position__c);
+                }
 
                 for (TrelloColumn currentColumn : usersWithColumns.trelloColumnList) {
                     columnNameByIdMap.put(currentColumn.id, currentColumn.name);
@@ -154,8 +166,25 @@ public with sharing class TrelloSyncController {
                 }
 
                 for (TrelloCard currentCard : cardList) {
+                    if (!statusNameByPositionMap.isEmpty()) {
+                        Boolean isEqualPositions = (
+                            statusNameByPositionMap.get(columnPositionByIdMap.get(currentCard.idList)) ==
+                            columnNameByIdMap.get(currentCard.idList)
+                        );
+
+                        if (isEqualPositions) {
+                            currentCard.columnPosition = columnPositionByIdMap.get(currentCard.idList);
+                        } else {
+                            currentCard.columnPosition = statusPositionByNameMap.get(
+                                columnNameByIdMap.get(currentCard.idList)
+                            );
+                        }
+
+                    } else {
+                        currentCard.columnPosition = columnPositionByIdMap.get(currentCard.idList);
+                    }
+
                     currentCard.columnName = columnNameByIdMap.get(currentCard.idList);
-                    currentCard.columnPosition = columnPositionByIdMap.get(currentCard.idList);
                     currentCard.userNames = new List<String>();
 
                     for (String userId : currentCard.idMembers) {
@@ -200,7 +229,6 @@ public with sharing class TrelloSyncController {
                 Assignee__c = String.join(trelloCardList[i].userNames, ', '),
                 Due_Date__c = trelloCardList[i].due,
                 Status__c = trelloCardList[i].columnName,
-                Status_Id__c = trelloCardList[i].idList,
                 StatusPosition__c = trelloCardList[i].columnPosition,
                 Card_Position__c = String.valueOf(trelloCardList[i].columnPosition) + String.valueOf(cardPosition)
             );
@@ -210,11 +238,13 @@ public with sharing class TrelloSyncController {
         }
 
         insert cardList;
+
+        TrelloSyncController.updateSyncDate();
     }
 
     private static Map<String, String> getTrelloSettings() {
         Map<String, String> trelloSettingsMap = new Map<String, String>();
-        TrelloSettings__c trelloSettings = TrelloSettings__c.getInstance();
+        TrelloSettings__c trelloSettings = TrelloSettings__c.getOrgDefaults();
         Boolean isTrelloSettings = (trelloSettings != null
             && trelloSettings.Api_key__c != null
             && trelloSettings.Board_Name__c != null
@@ -232,6 +262,16 @@ public with sharing class TrelloSyncController {
         }
 
         return trelloSettingsMap;
+    }
+
+    private static void updateSyncDate() {
+        TrelloSettings__c trelloSettings = TrelloSettings__c.getOrgDefaults();
+
+        if (trelloSettings != null) {
+            trelloSettings.Sync_Date__c = System.now();
+
+            update trelloSettings;
+        }
     }
 
     public class TrelloBoard {

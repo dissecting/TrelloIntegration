@@ -5,40 +5,32 @@
     <ltng:require scripts="{!$Resource.dragula + '/dragula/dragula.js'}"/>
 
     <aura:attribute name="kanbanData" type="KanbanBoardController.KanbanBoard"/>
+    <aura:attribute name="isSync" type="Boolean" default="false"/>
 
     <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
     <aura:handler name="render" value="{!this}" action="{!c.onRender}"/>
 
-    <div style="padding:0.5rem;">
-        <aura:iteration var="status" items="{!v.kanbanData.statusList}" indexVar="index">
-            <div class="stageContainer">
-                <div class="slds-grid slds-grid_vertical">
-                    <div class="slds-media slds-no-space slds-has-divider_bottom-space slds-media_center">
-                        <div class="slds-media__body">
-                            <h1 class="slds-page-header__title slds-align-middle slds-truncate" title="{!status}">{!status}</h1>
-                        </div>
-                    </div>
-                </div>
-                <ul id="{!index}"
-                    class="slds-has-dividers_around-space dropZone"
-                    data-status="{!status}"
-                    style="height:70vh;overflow-y:auto;">
-                    &nbsp;
-                    <aura:iteration var="objRecord" items="{!v.kanbanData.cardList}" indexVar="indexCard">
-                        <aura:if isTrue="{!status == objRecord.Status__c}">
-                            <li class="slds-item slds-m-around_small" id="{!objRecord.Id}">
-                                <article class="slds-tile slds-tile_board">
-                                    <h3 class="slds-truncate" title="{!objRecord.Name}">
-                                        <a href="javascript:void(0);" onclick="{!c.doView}">
-                                            <span class="slds-truncate" id="{!objRecord.Id}">{!objRecord.Name}</span>
-                                        </a>
-                                    </h3>
-                                </article>
-                            </li>
-                        </aura:if>
-                    </aura:iteration>
-                </ul>
-            </div>
-        </aura:iteration>
-   </div>
+    <div align="left" class="buttonsBar">
+        <lightning:button class="waves-effect waves-light btn" label="Sync" disabled="{!v.isSync}" onclick="{!c.onSync}"/>
+        <span class="syncTitle">Last sync: {!v.kanbanData.syncDate}</span>
+        <div aura:id="preloader" class="in-progress">
+            <div class="indeterminate"/>
+        </div>
+    </div>
+
+    <aura:iteration var="status" items="{!v.kanbanData.statusList}" indexVar="index">
+        <div class="stageContainer">
+            <h5 class="stageTitle" title="{!status}">{!status}</h5>
+            <ul id="{!index}" data-status="{!status}">
+                &nbsp;
+                <aura:iteration var="objRecord" items="{!v.kanbanData.cardList}">
+                    <aura:if isTrue="{!status == objRecord.Status__c}">
+                        <li id="{!objRecord.Id}" class="card white card-content">
+                            <span class="card-title">{!objRecord.Name}</span>
+                        </li>
+                    </aura:if>
+                </aura:iteration>
+            </ul>
+        </div>
+    </aura:iteration>
 </aura:component>

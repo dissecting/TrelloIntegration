@@ -3,13 +3,8 @@
         helper.handleInit(component);
     },
 
-    doView: function(component, event, helper) {
-        var editRecordEvent = $A.get("e.force:navigateToSObject");
-
-        editRecordEvent.setParams({
-            "recordId": event.target.id
-        });
-        editRecordEvent.fire();
+    onSync: function(component, event, helper) {
+        helper.handleSync(component);
     },
 
     onRender : function(component, event, helper) {
@@ -22,11 +17,18 @@
             }
 
             dragula(elements).on("drop", function(el, target) {
-                helper.updateStatus(
+                var cardElements = target.children;
+                var cardIds = [];
+
+                for (var i = 0; i < cardElements.length; i++) {
+                    cardIds.push(cardElements[i].id);
+                }
+
+                helper.handleUpdateStatus(
                     component,
-                    el.id,
                     target.getAttribute("data-status"),
-                    target.id
+                    target.id,
+                    cardIds
                 );
             });
         }
