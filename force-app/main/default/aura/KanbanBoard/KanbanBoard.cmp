@@ -6,14 +6,16 @@
 
     <aura:attribute name="kanbanData" type="KanbanBoardController.KanbanBoard"/>
     <aura:attribute name="isSync" type="Boolean" default="false"/>
+    <aura:attribute name="isRendered" type="Boolean" default="false"/>
 
     <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
     <aura:handler name="render" value="{!this}" action="{!c.onRender}"/>
+    <aura:handler event="force:showToast" action="{!c.onToast}"/>
 
-    <div align="left" class="buttonsBar">
+    <div align="left" class="syncBar">
         <lightning:button class="waves-effect waves-light btn" label="Sync" disabled="{!v.isSync}" onclick="{!c.onSync}"/>
         <span class="syncTitle">Last sync: {!v.kanbanData.syncDate}</span>
-        <div aura:id="preloader" class="in-progress">
+        <div aura:id="preloader">
             <div class="indeterminate"/>
         </div>
     </div>
@@ -25,12 +27,28 @@
                 &nbsp;
                 <aura:iteration var="objRecord" items="{!v.kanbanData.cardList}">
                     <aura:if isTrue="{!status == objRecord.Status__c}">
-                        <li id="{!objRecord.Id}" class="card white card-content">
+                        <li id="{!objRecord.Id}" class="card white card-content" onclick="{!c.onEdit}">
                             <span class="card-title">{!objRecord.Name}</span>
+                            <br/>
+                            <lightning:formattedDateTime class="dueDate" value="{!objRecord.Due_Date__c}"
+                                year="numeric" month="short" day="numeric" hour="2-digit"
+                                minute="2-digit" hour12="false"/>
+                            <aura:if isTrue="{!objRecord.Assignee__c}">
+                                <lightning:icon class="descIcon" iconName="utility:left_align_text"
+                                    size="small" title="{!objRecord.Description__c}"/>
+                            </aura:if>
+                            <aura:if isTrue="{!objRecord.Assignee__c}">
+                                <lightning:icon class="userIcon" iconName="utility:animal_and_nature"
+                                    size="small" title="{!objRecord.Assignee__c}"/>
+                            </aura:if>
                         </li>
                     </aura:if>
                 </aura:iteration>
             </ul>
+            <div align="left" class="createCard">
+                <lightning:buttonIcon class="btn-floating btn-small waves-effect waves-light blue lighten-4"
+                    iconName="utility:add" onclick="{!c.onCreateCard}"/>
+            </div>
         </div>
     </aura:iteration>
 </aura:component>

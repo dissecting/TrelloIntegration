@@ -123,18 +123,23 @@ public with sharing class TrelloSyncController {
         return usersWithColumns;
     }
 
-    private static List<TrelloCard> getCards(Set<String> cardIds) {
+    private static List<Card__c> getCards(Set<String> cardIds) {
         UsersWithColumns usersWithColumns = TrelloSyncController.getUsersWithColumns();
+
         Map<String, String> columnNameByIdMap = new Map<String, String>();
         Map<String, Integer> columnPositionByIdMap = new Map<String, Integer>();
         Map<Integer, String> statusNameByPositionMap = new Map<Integer, String>();
         Map<String, Integer> statusPositionByNameMap = new Map<String, Integer>();
         Map<String, String> userNameByIdMap = new Map<String, String>();
+
         List<TrelloCard> cardList = new List<TrelloCard>();
-        List<TrelloCard> cardNewList = new List<TrelloCard>();
+        List<Card__c> cardNewList = new List<Card__c>();
+
         String primaryParameter = 'boards';
         String secondaryParameter = 'cards';
         String objectName = 'TrelloCard';
+
+        Integer cardPosition = 0;
 
         if (!usersWithColumns.trelloColumnList.isEmpty()) {
             cardList = (List<TrelloCard>) TrelloSyncController.sendGetRequest(
@@ -165,35 +170,52 @@ public with sharing class TrelloSyncController {
                     userNameByIdMap.put(currentUser.id, currentUser.username);
                 }
 
-                for (TrelloCard currentCard : cardList) {
+                for (Integer i = 0; i < cardList.size(); i++) {
                     if (!statusNameByPositionMap.isEmpty()) {
                         Boolean isEqualPositions = (
-                            statusNameByPositionMap.get(columnPositionByIdMap.get(currentCard.idList)) ==
-                            columnNameByIdMap.get(currentCard.idList)
+                            statusNameByPositionMap.get(columnPositionByIdMap.get(cardList[i].idList)) ==
+                            columnNameByIdMap.get(cardList[i].idList)
                         );
 
                         if (isEqualPositions) {
-                            currentCard.columnPosition = columnPositionByIdMap.get(currentCard.idList);
+                            cardList[i].columnPosition = columnPositionByIdMap.get(cardList[i].idList);
                         } else {
-                            currentCard.columnPosition = statusPositionByNameMap.get(
-                                columnNameByIdMap.get(currentCard.idList)
+                            cardList[i].columnPosition = statusPositionByNameMap.get(
+                                columnNameByIdMap.get(cardList[i].idList)
                             );
                         }
 
                     } else {
-                        currentCard.columnPosition = columnPositionByIdMap.get(currentCard.idList);
+                        cardList[i].columnPosition = columnPositionByIdMap.get(cardList[i].idList);
                     }
 
-                    currentCard.columnName = columnNameByIdMap.get(currentCard.idList);
-                    currentCard.userNames = new List<String>();
+                    cardList[i].columnName = columnNameByIdMap.get(cardList[i].idList);
+                    cardList[i].userNames = new List<String>();
 
-                    for (String userId : currentCard.idMembers) {
-                        currentCard.userNames.add(userNameByIdMap.get(userId));
+                    for (String userId : cardList[i].idMembers) {
+                        cardList[i].userNames.add(userNameByIdMap.get(userId));
                     }
 
-                    if (!cardIds.contains(currentCard.id)) {
-                        cardNewList.add(currentCard);
+                    if (i != 0 && (cardList[i].columnPosition != cardList[i-1].columnPosition)) {
+                        cardPosition = 0;
                     }
+
+                    if (!cardIds.contains(cardList[i].id)) {
+                        Card__c newCard = new Card__c(
+                            Card_Id__c = cardList[i].id,
+                            Name = cardList[i].name,
+                            Description__c = cardList[i].descValue,
+                            Assignee__c = String.join(cardList[i].userNames, ', '),
+                            Due_Date__c = cardList[i].due,
+                            Status__c = cardList[i].columnName,
+                            StatusPosition__c = cardList[i].columnPosition,
+                            Card_Position__c = String.valueOf(cardList[i].columnPosition) + String.valueOf(cardPosition)
+                        );
+
+                        cardNewList.add(newCard);
+                    }
+
+                    cardPosition++;
                 }
             }
         }
@@ -202,42 +224,20 @@ public with sharing class TrelloSyncController {
     }
 
     public static void syncCards() {
-        List<Card__c> cardList = new List<Card__c>();
         List<Card__c> availableCardList = [
             SELECT Card_Id__c
             FROM Card__c
         ];
 
-        Integer cardPosition = 0;
         Set<String> cardIds = new Set<String>();
 
         for (Card__c currentCard : availableCardList) {
             cardIds.add(currentCard.Card_Id__c);
         }
 
-        List<TrelloCard> trelloCardList = TrelloSyncController.getCards(cardIds);
+        List<Card__c> trelloCardList = TrelloSyncController.getCards(cardIds);
 
-        for (Integer i = 0; i < trelloCardList.size(); i++) {
-            if (i != 0 && (trelloCardList[i].columnPosition != trelloCardList[i-1].columnPosition)) {
-                cardPosition = 0;
-            }
-
-            Card__c newCard = new Card__c(
-                Card_Id__c = trelloCardList[i].id,
-                Name = trelloCardList[i].name,
-                Description__c = trelloCardList[i].descValue,
-                Assignee__c = String.join(trelloCardList[i].userNames, ', '),
-                Due_Date__c = trelloCardList[i].due,
-                Status__c = trelloCardList[i].columnName,
-                StatusPosition__c = trelloCardList[i].columnPosition,
-                Card_Position__c = String.valueOf(trelloCardList[i].columnPosition) + String.valueOf(cardPosition)
-            );
-
-            cardList.add(newCard);
-            cardPosition++;
-        }
-
-        insert cardList;
+        insert trelloCardList;
 
         TrelloSyncController.updateSyncDate();
     }

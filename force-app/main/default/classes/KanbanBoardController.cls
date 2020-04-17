@@ -11,7 +11,7 @@ public with sharing class KanbanBoardController {
         List<String> statuses = new List<String>();
         List<Card__c> availableCardList = [
             SELECT Name, Description__c, Assignee__c, Due_Date__c,
-                Status__c, Status_Id__c, StatusPosition__c, Card_Position__c
+                Status__c, StatusPosition__c, Card_Position__c
             FROM Card__c
             ORDER BY StatusPosition__c, Card_Position__c, LastModifiedDate
         ];

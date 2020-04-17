@@ -6,7 +6,7 @@
     background-color: rgba(255, 255, 255, 0.726);
 }
 
-.THIS.buttonsBar {
+.THIS.syncBar {
     background-color: rgba(255, 255, 255, 0.726);
 }
 
@@ -33,5 +33,20 @@
 }
 
 .THIS .card-title {
+    margin-left: 5px;
+}
+
+.THIS .dueDate {
+    margin-left: 5px;
+    font-size: small;
+}
+
+.THIS .userIcon {
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
+}
+
+.THIS .descIcon {
     margin-left: 5px;
 }

@@ -19,12 +19,10 @@
 
     handleSync: function(component) {
         var preloader = component.find("preloader");
+        var action = component.get("c.getSync");
 
         component.set("v.isSync", true);
-        $A.util.removeClass(preloader, "in-progress");
         $A.util.addClass(preloader, "progress");
-
-        var action = component.get("c.getSync");
 
         action.setCallback(this, function(response){
             var state = response.getState();
@@ -36,7 +34,6 @@
                 this.handleInit(component);
                 component.set("v.isSync", false);
                 $A.util.removeClass(preloader, "progress");
-                $A.util.addClass(preloader, "in-progress");
             } else if (state === "ERROR") {
                 var errors = response.getError();
 
@@ -47,9 +44,10 @@
         $A.enqueueAction(action);
     },
 
-    handleUpdateStatus : function(component, statusValue, position, cardIds) {
+    handleUpdateStatus: function(component, statusValue, position, cardIds) {
         var action = component.get("c.getUpdateStatus");
 
+        component.set("v.isSync", true);
         action.setParams({
             "status": statusValue,
             "statusPosition": position,
@@ -59,7 +57,9 @@
         action.setCallback(this, function(response){
             var state = response.getState();
 
-            if (state === "ERROR") {
+            if (state === "SUCCESS") {
+                component.set("v.isSync", false);
+            } else if (state === "ERROR") {
                 var errors = response.getError();
 
                 this.handleShowToast(component, state, errors[0].message);
@@ -78,5 +78,5 @@
             "message": msg
         });
         toastEvent.fire();
-    },
+    }
 })
