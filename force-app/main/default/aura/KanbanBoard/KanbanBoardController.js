@@ -8,94 +8,38 @@
     },
 
     onRender: function(component, event, helper) {
-        var statusList = component.get("v.kanbanData.statusList");
-        var elements = [];
-
-        if (statusList) {
-            if (!component.get("v.isRendered")) {
-                for (var i = 0; i < statusList.length; i++) {
-                    elements.push(document.getElementById(i));
-                }
-
-                var drake = dragula(elements).on("drop", function(el, target) {
-                    var cardElements = target.children;
-                    var cardIds = [];
-
-                    for (var i = 0; i < cardElements.length; i++) {
-                        cardIds.push(cardElements[i].id);
-                    }
-
-                    helper.handleUpdateStatus(
-                        component,
-                        target.getAttribute("data-status"),
-                        target.id,
-                        cardIds
-                    );
-                });
-
-                component.set("v.dragula", drake);
-            }
-            component.set("v.isRendered", true);
-        }
+        helper.handleDragAndDrop(component);
     },
 
     onCardDetail: function(component, event, helper) {
-        $A.createComponent(
-            "c:CardDetailForm", {
-                "recordId": event.target.id
-            },
-           function(content, status) {
-               if (status === "SUCCESS") {
-                   component.find("overlayLib").showCustomModal({
-                       header: "Card",
-                       body: content,
-                       showCloseButton: true
-                   })
-               }
-           }
-        );
+        var params = { "recordId": event.target.id };
+        var formType = "c:CardDetailForm";
+        var headerValue = "Card";
+
+        helper.handleShowModal(component, params, formType, headerValue);
     },
 
     onCreateCard: function(component, event, helper) {
         var stageName = event.target.getAttribute("data-stage");
         var columnPosition = event.target.getAttribute("data-column");
         var cardCount = document.getElementById(columnPosition).children.length;
+        var params = {
+            "statusName": stageName,
+            "statusPosition": columnPosition,
+            "cardPosition": cardCount
+        };
+        var formType = "c:CreateCardForm";
+        var headerValue = "New Card";
 
-        $A.createComponent(
-            "c:CreateCardForm", {
-                "statusName": stageName,
-                "statusPosition": columnPosition,
-                "cardPosition": cardCount
-            },
-           function(content, status) {
-               if (status === "SUCCESS") {
-                    var modalPromise = component.find("overlayLib").showCustomModal({
-                       header: "New Card",
-                       body: content,
-                       showCloseButton: true
-                   });
-                   component.set("v.modalPromise", modalPromise);
-               }
-           }
-        );
+        helper.handleShowModal(component, params, formType, headerValue);
     },
 
     onEditCard: function(component, event, helper) {
-        $A.createComponent(
-            "c:EditCardForm", {
-                "recordId": event.target.id
-            },
-           function(content, status) {
-               if (status === "SUCCESS") {
-                    var modalPromise = component.find("overlayLib").showCustomModal({
-                       header: "Edit Card",
-                       body: content,
-                       showCloseButton: true
-                   });
-                   component.set("v.modalPromise", modalPromise);
-               }
-           }
-        );
+        var params = { "recordId": event.target.id };
+        var formType = "c:EditCardForm";
+        var headerValue = "Edit Card";
+
+        helper.handleShowModal(component, params, formType, headerValue);
     },
 
     onCardCreated: function(component, event, helper) {
@@ -103,11 +47,5 @@
         component.get("v.modalPromise").then(function (modal) {
             modal.close();
         });
-    },
-
-    onToast: function(component, event, helper) {
-        if (event.getParams().type === "SUCCESS" && event.getParams().message.includes("was saved.")) {
-            helper.handleInit(component);
-        }
     }
 })

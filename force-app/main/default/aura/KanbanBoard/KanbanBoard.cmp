@@ -12,7 +12,6 @@
 
     <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
     <aura:handler name="render" value="{!this}" action="{!c.onRender}"/>
-    <aura:handler event="force:showToast" action="{!c.onToast}"/>
     <aura:handler event="c:CardCreated" action="{!c.onCardCreated}"/>
 
     <lightning:overlayLibrary aura:id="overlayLib"/>
@@ -34,7 +33,9 @@
                 <aura:iteration var="objRecord" items="{!v.kanbanData.cardList}">
                     <aura:if isTrue="{!status == objRecord.Status__c}">
                         <li id="{!objRecord.Id}" class="card white card-content">
-                            <span class="card-title" onclick="{!c.onCardDetail}">{!objRecord.Name}</span>
+                            <span class="card-title">{!objRecord.Name}</span>
+                            <lightning:buttonIcon class="detailsIcon" iconName="utility:summarydetail"
+                                    size="small" title="View Card" onclick="{!c.onCardDetail}"/>
                             <aura:if isTrue="{!not(objRecord.Card_Id__c)}">
                                 <lightning:buttonIcon class="editIcon" iconName="utility:edit"
                                     size="small" title="Edit Card" onclick="{!c.onEditCard}"/>
@@ -47,7 +48,7 @@
                                     minute="2-digit" hour12="false"/>
                             </aura:if>
                             <aura:if isTrue="{!objRecord.Description__c}">
-                                <lightning:icon class="descIcon" iconName="utility:left_align_text"
+                                <lightning:icon class="descIcon" iconName="utility:description"
                                     size="small" title="{!objRecord.Description__c}"/>
                             </aura:if>
                             <aura:if isTrue="{!objRecord.Assignee__c}">

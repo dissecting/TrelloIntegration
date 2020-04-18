@@ -41,9 +41,15 @@
     font-size: small;
 }
 
+.THIS .detailsIcon {
+    position: absolute;
+    right: 0%;
+    top: 0px;
+}
+
 .THIS .editIcon {
     position: absolute;
-    right: 0px;
+    right: 10%;
     top: 0px;
 }
 

@@ -46,12 +46,20 @@ public with sharing class KanbanBoardController {
             cardList.add(card);
         }
 
-        update cardList;
+        try {
+            update cardList;
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
     }
 
     @AuraEnabled
     public static void getSync() {
-        TrelloSyncController.syncCards();
+        try {
+            TrelloSyncController.syncCards();
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
     }
 
     public class KanbanBoard {
