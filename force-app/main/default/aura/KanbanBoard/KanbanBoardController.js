@@ -17,7 +17,7 @@
                     elements.push(document.getElementById(i));
                 }
 
-                dragula(elements).on("drop", function(el, target) {
+                var drake = dragula(elements).on("drop", function(el, target) {
                     var cardElements = target.children;
                     var cardIds = [];
 
@@ -32,30 +32,77 @@
                         cardIds
                     );
                 });
+
+                component.set("v.dragula", drake);
             }
             component.set("v.isRendered", true);
         }
     },
 
-    onEdit: function(component, event, helper) {
-        var editRecordEvent = $A.get("e.force:editRecord");
-
-        editRecordEvent.setParams({
-            "recordId": event.target.id
-        });
-        editRecordEvent.fire();
+    onCardDetail: function(component, event, helper) {
+        $A.createComponent(
+            "c:CardDetailForm", {
+                "recordId": event.target.id
+            },
+           function(content, status) {
+               if (status === "SUCCESS") {
+                   component.find("overlayLib").showCustomModal({
+                       header: "Card",
+                       body: content,
+                       showCloseButton: true
+                   })
+               }
+           }
+        );
     },
 
     onCreateCard: function(component, event, helper) {
-        var createRecordEvent = $A.get("e.force:createRecord");
+        var stageName = event.target.getAttribute("data-stage");
+        var columnPosition = event.target.getAttribute("data-column");
+        var cardCount = document.getElementById(columnPosition).children.length;
 
-        createRecordEvent.setParams({
-            "entityApiName": "Card__c",
-            "defaultFieldValues": {
-                "Name" : "test"
-            }
+        $A.createComponent(
+            "c:CreateCardForm", {
+                "statusName": stageName,
+                "statusPosition": columnPosition,
+                "cardPosition": cardCount
+            },
+           function(content, status) {
+               if (status === "SUCCESS") {
+                    var modalPromise = component.find("overlayLib").showCustomModal({
+                       header: "New Card",
+                       body: content,
+                       showCloseButton: true
+                   });
+                   component.set("v.modalPromise", modalPromise);
+               }
+           }
+        );
+    },
+
+    onEditCard: function(component, event, helper) {
+        $A.createComponent(
+            "c:EditCardForm", {
+                "recordId": event.target.id
+            },
+           function(content, status) {
+               if (status === "SUCCESS") {
+                    var modalPromise = component.find("overlayLib").showCustomModal({
+                       header: "Edit Card",
+                       body: content,
+                       showCloseButton: true
+                   });
+                   component.set("v.modalPromise", modalPromise);
+               }
+           }
+        );
+    },
+
+    onCardCreated: function(component, event, helper) {
+        helper.handleInit(component);
+        component.get("v.modalPromise").then(function (modal) {
+            modal.close();
         });
-        createRecordEvent.fire();
     },
 
     onToast: function(component, event, helper) {

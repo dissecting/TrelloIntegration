@@ -227,6 +227,7 @@ public with sharing class TrelloSyncController {
         List<Card__c> availableCardList = [
             SELECT Card_Id__c
             FROM Card__c
+            WHERE Card_Id__c != null
         ];
 
         Set<String> cardIds = new Set<String>();

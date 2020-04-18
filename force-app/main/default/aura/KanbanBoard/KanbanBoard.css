@@ -41,6 +41,12 @@
     font-size: small;
 }
 
+.THIS .editIcon {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+}
+
 .THIS .userIcon {
     position: absolute;
     right: 0px;
@@ -49,4 +55,12 @@
 
 .THIS .descIcon {
     margin-left: 5px;
+}
+
+.THIS .dateIcon {
+    margin-left: 5px;
+}
+
+.THIS .createCard {
+    min-width: 100%;
 }

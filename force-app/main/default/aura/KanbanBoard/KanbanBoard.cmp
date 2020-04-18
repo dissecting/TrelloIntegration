@@ -7,13 +7,19 @@
     <aura:attribute name="kanbanData" type="KanbanBoardController.KanbanBoard"/>
     <aura:attribute name="isSync" type="Boolean" default="false"/>
     <aura:attribute name="isRendered" type="Boolean" default="false"/>
+    <aura:attribute name="dragula" type="Object"/>
+    <aura:attribute name="modalPromise" type="Aura.Action"/>
 
     <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
     <aura:handler name="render" value="{!this}" action="{!c.onRender}"/>
     <aura:handler event="force:showToast" action="{!c.onToast}"/>
+    <aura:handler event="c:CardCreated" action="{!c.onCardCreated}"/>
+
+    <lightning:overlayLibrary aura:id="overlayLib"/>
 
     <div align="left" class="syncBar">
-        <lightning:button class="waves-effect waves-light btn" label="Sync" disabled="{!v.isSync}" onclick="{!c.onSync}"/>
+        <lightning:button class="waves-effect waves-light btn"
+            label="Sync" iconName="utility:sync" iconPosition="left" disabled="{!v.isSync}" onclick="{!c.onSync}"/>
         <span class="syncTitle">Last sync: {!v.kanbanData.syncDate}</span>
         <div aura:id="preloader">
             <div class="indeterminate"/>
@@ -27,27 +33,34 @@
                 &nbsp;
                 <aura:iteration var="objRecord" items="{!v.kanbanData.cardList}">
                     <aura:if isTrue="{!status == objRecord.Status__c}">
-                        <li id="{!objRecord.Id}" class="card white card-content" onclick="{!c.onEdit}">
-                            <span class="card-title">{!objRecord.Name}</span>
+                        <li id="{!objRecord.Id}" class="card white card-content">
+                            <span class="card-title" onclick="{!c.onCardDetail}">{!objRecord.Name}</span>
+                            <aura:if isTrue="{!not(objRecord.Card_Id__c)}">
+                                <lightning:buttonIcon class="editIcon" iconName="utility:edit"
+                                    size="small" title="Edit Card" onclick="{!c.onEditCard}"/>
+                            </aura:if>
                             <br/>
-                            <lightning:formattedDateTime class="dueDate" value="{!objRecord.Due_Date__c}"
-                                year="numeric" month="short" day="numeric" hour="2-digit"
-                                minute="2-digit" hour12="false"/>
-                            <aura:if isTrue="{!objRecord.Assignee__c}">
+                            <aura:if isTrue="{!objRecord.Due_Date__c}">
+                                <lightning:icon class="dateIcon" iconName="utility:clock" size="small"/>
+                                <lightning:formattedDateTime class="dueDate" value="{!objRecord.Due_Date__c}"
+                                    year="numeric" month="short" day="numeric" hour="2-digit"
+                                    minute="2-digit" hour12="false"/>
+                            </aura:if>
+                            <aura:if isTrue="{!objRecord.Description__c}">
                                 <lightning:icon class="descIcon" iconName="utility:left_align_text"
                                     size="small" title="{!objRecord.Description__c}"/>
                             </aura:if>
                             <aura:if isTrue="{!objRecord.Assignee__c}">
-                                <lightning:icon class="userIcon" iconName="utility:animal_and_nature"
+                                <lightning:icon class="userIcon" iconName="utility:user"
                                     size="small" title="{!objRecord.Assignee__c}"/>
                             </aura:if>
                         </li>
                     </aura:if>
                 </aura:iteration>
             </ul>
-            <div align="left" class="createCard">
-                <lightning:buttonIcon class="btn-floating btn-small waves-effect waves-light blue lighten-4"
-                    iconName="utility:add" onclick="{!c.onCreateCard}"/>
+            <div data-stage="{!status}" data-column="{!index}" align="left">
+                <lightning:button class="createCard btn-flat"
+                    label="Add Card" iconName="utility:add" iconPosition="left" onclick="{!c.onCreateCard}"/>
             </div>
         </div>
     </aura:iteration>

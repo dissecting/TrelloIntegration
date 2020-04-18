@@ -29,11 +29,14 @@
 
             if (state === "SUCCESS") {
                 var msgSuccess = "Sync completed successfully";
+                var drake = component.get("v.dragula");
 
                 this.handleShowToast(component, state, msgSuccess);
                 this.handleInit(component);
                 component.set("v.isSync", false);
                 $A.util.removeClass(preloader, "progress");
+                drake.cancel();
+                $A.get("e.force:refreshView").fire();
             } else if (state === "ERROR") {
                 var errors = response.getError();
 
@@ -47,7 +50,6 @@
     handleUpdateStatus: function(component, statusValue, position, cardIds) {
         var action = component.get("c.getUpdateStatus");
 
-        component.set("v.isSync", true);
         action.setParams({
             "status": statusValue,
             "statusPosition": position,
@@ -57,9 +59,7 @@
         action.setCallback(this, function(response){
             var state = response.getState();
 
-            if (state === "SUCCESS") {
-                component.set("v.isSync", false);
-            } else if (state === "ERROR") {
+            if (state === "ERROR") {
                 var errors = response.getError();
 
                 this.handleShowToast(component, state, errors[0].message);

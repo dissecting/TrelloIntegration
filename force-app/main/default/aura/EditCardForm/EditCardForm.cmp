@@ -1,0 +1,25 @@
+<aura:component>
+    <aura:attribute name="recordId" type="String"/>
+
+    <aura:registerEvent name="cardCreated" type="c:CardCreated"/>
+
+    <lightning:recordEditForm aura:id="editRecordForm"
+        objectApiName="Card__c"
+        recordId="{!v.recordId}"
+        onsubmit="{!c.handleSubmit}"
+        onsuccess="{!c.handleSave}">
+        <div class="slds-grid">
+            <div class="slds-col slds-size_1-of-2">
+                <lightning:inputField fieldName="Name"/>
+                <lightning:inputField fieldName="Due_Date__c"/>
+            </div>
+            <div class="slds-col slds-size_1-of-2">
+                <lightning:inputField fieldName="Assignee__c"/>
+                <lightning:inputField fieldName="Description__c"/>
+            </div>
+        </div>
+        <div align="center">
+            <lightning:button class="slds-m-top_small" variant="brand" type="submit" name="submit" label="Submit"/>
+        </div>
+    </lightning:recordEditForm>
+</aura:component>
