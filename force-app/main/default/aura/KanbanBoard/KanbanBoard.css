@@ -1,0 +1,83 @@
+.THIS.stageContainer {
+    float: left;
+    margin: 5px;
+    min-width: 200px;
+    max-width: 200px;
+    background-color: rgba(255, 255, 255, 0.726);
+}
+
+.THIS.syncBar {
+    background-color: rgba(255, 255, 255, 0.726);
+}
+
+.THIS .waves-effect {
+    margin: 5px;
+}
+
+.THIS .syncTitle {
+    font-weight: bold;
+    font-size: medium;
+}
+
+.THIS .stageTitle {
+    text-align: left;
+    margin-left: 5px;
+    font-weight: bold;
+}
+
+.THIS .card {
+    margin: 5px;
+    min-height: 60px;
+    max-height: 60px;
+    text-align: left;
+}
+
+.THIS .card-title {
+    margin-left: 5px;
+    display: block;
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.THIS .dueDate {
+    position: absolute;
+    left: 15%;
+    bottom: 5%;
+    font-size: small;
+}
+
+.THIS .detailsIcon {
+    position: absolute;
+    right: 0%;
+    top: 0px;
+}
+
+.THIS .editIcon {
+    position: absolute;
+    right: 10%;
+    top: 0px;
+}
+
+.THIS .userIcon {
+    position: absolute;
+    right: 0px;
+    bottom: 5%;
+}
+
+.THIS .descIcon {
+    position: absolute;
+    right: 15%;
+    bottom: 5%;
+}
+
+.THIS .dateIcon {
+    position: absolute;
+    margin-left: 5px;
+    bottom: 5%;
+}
+
+.THIS .createCard {
+    min-width: 100%;
+}

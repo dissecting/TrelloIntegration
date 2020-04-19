@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>Trello_Sync_Endpoint</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Trello Sync Endpoint</shortDescription>
+        <value>https://api.trello.com/1/{0}/{1}/{2}?key={3}&amp;token={4}</value>
+    </labels>
+</CustomLabels>
