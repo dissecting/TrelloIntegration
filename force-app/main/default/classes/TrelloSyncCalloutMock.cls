@@ -8,8 +8,9 @@ public with sharing class TrelloSyncCalloutMock implements HttpCalloutMock {
         String endPoint = request.getEndpoint();
         HttpResponse response = new HttpResponse();
 
-		response.setStatus('OK');
+        response.setStatus('OK');
         response.setStatusCode(200);
+
         if (endPoint == endPointBoard) {
             response.setBody(
                 '[{"name":"testBoardName","id":"boardId","url":"https://test.com/testBoardName"}]'
