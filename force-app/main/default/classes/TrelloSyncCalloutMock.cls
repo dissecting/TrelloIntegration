@@ -35,5 +35,5 @@ public with sharing class TrelloSyncCalloutMock implements HttpCalloutMock {
         }
 
         return response;
-	}
+    }
 }
