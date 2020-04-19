@@ -34,10 +34,17 @@
 
 .THIS .card-title {
     margin-left: 5px;
+    display: block;
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .THIS .dueDate {
-    margin-left: 5px;
+    position: absolute;
+    left: 15%;
+    bottom: 5%;
     font-size: small;
 }
 
@@ -56,15 +63,19 @@
 .THIS .userIcon {
     position: absolute;
     right: 0px;
-    bottom: 0px;
+    bottom: 5%;
 }
 
 .THIS .descIcon {
-    margin-left: 5px;
+    position: absolute;
+    right: 15%;
+    bottom: 5%;
 }
 
 .THIS .dateIcon {
+    position: absolute;
     margin-left: 5px;
+    bottom: 5%;
 }
 
 .THIS .createCard {

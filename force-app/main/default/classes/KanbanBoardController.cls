@@ -2,11 +2,7 @@ public with sharing class KanbanBoardController {
 
     @AuraEnabled
     public static KanbanBoard getKanbanBoard() {
-        List<Trello_Status_Setting__mdt> statusList = [
-            SELECT Position__c, Status__c
-            FROM Trello_Status_Setting__mdt
-            ORDER BY Position__c
-        ];
+        List<Trello_Status_Setting__mdt> statusList = KanbanBoardController.getTrelloStatusSetting();
 
         List<String> statuses = new List<String>();
         List<Card__c> availableCardList = [
@@ -60,6 +56,16 @@ public with sharing class KanbanBoardController {
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
         }
+    }
+
+    @TestVisible
+    private static List<Trello_Status_Setting__mdt> getTrelloStatusSetting() {
+
+        return [
+            SELECT Position__c, Status__c
+            FROM Trello_Status_Setting__mdt
+            ORDER BY Position__c
+        ];
     }
 
     public class KanbanBoard {

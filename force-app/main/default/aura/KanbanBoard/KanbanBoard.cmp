@@ -33,7 +33,7 @@
                 <aura:iteration var="objRecord" items="{!v.kanbanData.cardList}">
                     <aura:if isTrue="{!status == objRecord.Status__c}">
                         <li id="{!objRecord.Id}" class="card white card-content">
-                            <span class="card-title">{!objRecord.Name}</span>
+                            <span class="card-title" title="{!objRecord.Name}">{!objRecord.Name}</span>
                             <lightning:buttonIcon class="detailsIcon" iconName="utility:summarydetail"
                                     size="small" title="View Card" onclick="{!c.onCardDetail}"/>
                             <aura:if isTrue="{!not(objRecord.Card_Id__c)}">
