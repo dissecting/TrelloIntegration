@@ -3,7 +3,6 @@ public with sharing class KanbanBoardController {
     @AuraEnabled
     public static KanbanBoard getKanbanBoard() {
         List<Trello_Status_Setting__mdt> statusList = KanbanBoardController.getTrelloStatusSetting();
-
         List<String> statuses = new List<String>();
         List<Card__c> availableCardList = [
             SELECT Name, Description__c, Assignee__c, Due_Date__c,
