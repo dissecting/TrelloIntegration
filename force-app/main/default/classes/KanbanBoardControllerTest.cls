@@ -87,6 +87,6 @@ private class KanbanBoardControllerTest {
                 AND Id = :cardId
         ];
 
-        System.assertEquals(false, actualCardList.isEmpty(), 'Card data is updated');
+        System.assertEquals(false, actualCardList.isEmpty(), 'Card data is not updated');
     }
 }
