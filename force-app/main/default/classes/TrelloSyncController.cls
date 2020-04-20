@@ -200,7 +200,7 @@ public with sharing class TrelloSyncController {
                         cardPosition = 0;
                     }
 
-                    if (!cardIds.contains(cardList[i].id)) {
+                    if (!cardIds.contains(cardList[i].id) && cardList[i].columnPosition != null) {
                         Card__c newCard = new Card__c(
                             Card_Id__c = cardList[i].id,
                             Name = cardList[i].name,
