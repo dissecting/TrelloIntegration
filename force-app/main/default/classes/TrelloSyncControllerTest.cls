@@ -3,8 +3,7 @@ private class TrelloSyncControllerTest {
 
     @testSetup
     private static void setupTestData() {
-
-        TrelloSettings__c trelloSettings = new TrelloSettings__c(
+        TrelloSettings__c newTrelloSettings = new TrelloSettings__c(
             Api_key__c = 'testApiKey',
             Board_Name__c = 'testBoardName',
             Board_URL__c = 'https://test.com/testBoardName',
@@ -12,15 +11,47 @@ private class TrelloSyncControllerTest {
             User_Name__c = 'TestUser'
         );
 
-        insert trelloSettings;
+        insert newTrelloSettings;
 
-        System.assertNotEquals(null, trelloSettings.Id, 'Record is not created');
+        System.assertNotEquals(null, newTrelloSettings.Id, 'Record is not created');
     }
 
     @isTest
     private static void testGetTrelloCards() {
+        String endPoint = Label.Trello_Sync_Endpoint;
+        TrelloSettings__c trelloSettings = TrelloSettings__c.getOrgDefaults();
+        List<String> endPointList = new List<String> {
+            String.format(endPoint, new List<String> {
+                'members',
+                trelloSettings.User_Name__c,
+                'boards',
+                trelloSettings.Api_key__c,
+                trelloSettings.Token__c
+            }),
+            String.format(endPoint, new List<String> {
+                'boards',
+                'boardId',
+                'lists',
+                trelloSettings.Api_key__c,
+                trelloSettings.Token__c
+            }),
+            String.format(endPoint, new List<String> {
+                'boards',
+                'boardId',
+                'members',
+                trelloSettings.Api_key__c,
+                trelloSettings.Token__c
+            }),
+            String.format(endPoint, new List<String> {
+                'boards',
+                'boardId',
+                'cards',
+                trelloSettings.Api_key__c,
+                trelloSettings.Token__c
+            })
+        };
 
-        Test.setMock(HttpCalloutMock.class, new TrelloSyncCalloutMock());
+        Test.setMock(HttpCalloutMock.class, new TrelloSyncCalloutMock(endPointList));
         Test.startTest();
 
         TrelloSyncController.syncCards();
@@ -33,9 +64,13 @@ private class TrelloSyncControllerTest {
             LIMIT 1
         ];
 
-        TrelloSettings__c trelloSettings = TrelloSettings__c.getOrgDefaults();
+        TrelloSettings__c updatedTrelloSettings = TrelloSettings__c.getOrgDefaults();
 
         System.assertNotEquals(null, card.id, 'Card is not created');
-        System.assertEquals(System.now(), trelloSettings.Sync_Date__c, 'Sync Date is not updated');
+        System.assertEquals(
+            System.now().format('MM/dd/yyyy HH:mm'),
+            updatedTrelloSettings.Sync_Date__c.format('MM/dd/yyyy HH:mm'),
+            'Sync Date is not updated'
+        );
     }
 }
