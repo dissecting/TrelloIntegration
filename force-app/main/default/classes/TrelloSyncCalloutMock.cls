@@ -1,10 +1,18 @@
 public with sharing class TrelloSyncCalloutMock implements HttpCalloutMock {
 
+    private String endPointBoard;
+    private String endPointColumn;
+    private String endPointUser;
+    private String endPointCard;
+
+    public TrelloSyncCalloutMock(List<String> endPointList) {
+        this.endPointBoard = endPointList[0];
+        this.endPointColumn = endPointList[1];
+        this.endPointUser = endPointList[2];
+        this.endPointCard = endPointList[3];
+    }
+
     public HttpResponse respond(HttpRequest request) {
-        String endPointBoard = 'https://api.trello.com/1/members/TestUser/boards?key=testApiKey&token=testToken';
-        String endPointColumn = 'https://api.trello.com/1/boards/boardId/lists?key=testApiKey&token=testToken';
-        String endPointUser = 'https://api.trello.com/1/boards/boardId/members?key=testApiKey&token=testToken';
-        String endPointCard = 'https://api.trello.com/1/boards/boardId/cards?key=testApiKey&token=testToken';
         String endPoint = request.getEndpoint();
         HttpResponse response = new HttpResponse();
 
