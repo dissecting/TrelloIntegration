@@ -8,7 +8,8 @@ private class TrelloSyncControllerTest {
             Board_Name__c = 'testBoardName',
             Board_URL__c = 'https://test.com/testBoardName',
             Token__c = 'testToken',
-            User_Name__c = 'TestUser'
+            User_Name__c = 'TestUser',
+            Trello_Sync_Endpoint__c = 'https://api.trello.com/1/{0}/{1}/{2}?key={3}&token={4}'
         );
 
         insert newTrelloSettings;
@@ -18,31 +19,30 @@ private class TrelloSyncControllerTest {
 
     @isTest
     private static void testGetTrelloCards() {
-        String endPoint = Label.Trello_Sync_Endpoint;
-        TrelloSettings__c trelloSettings = TrelloSettings__c.getOrgDefaults();
+        TrelloSettings__c trelloSettings = TrelloSettings__c.getInstance();
         List<String> endPointList = new List<String> {
-            String.format(endPoint, new List<String> {
+            String.format(trelloSettings.Trello_Sync_Endpoint__c, new List<String> {
                 'members',
                 trelloSettings.User_Name__c,
                 'boards',
                 trelloSettings.Api_key__c,
                 trelloSettings.Token__c
             }),
-            String.format(endPoint, new List<String> {
+            String.format(trelloSettings.Trello_Sync_Endpoint__c, new List<String> {
                 'boards',
                 'boardId',
                 'lists',
                 trelloSettings.Api_key__c,
                 trelloSettings.Token__c
             }),
-            String.format(endPoint, new List<String> {
+            String.format(trelloSettings.Trello_Sync_Endpoint__c, new List<String> {
                 'boards',
                 'boardId',
                 'members',
                 trelloSettings.Api_key__c,
                 trelloSettings.Token__c
             }),
-            String.format(endPoint, new List<String> {
+            String.format(trelloSettings.Trello_Sync_Endpoint__c, new List<String> {
                 'boards',
                 'boardId',
                 'cards',
@@ -64,7 +64,7 @@ private class TrelloSyncControllerTest {
             LIMIT 1
         ];
 
-        TrelloSettings__c updatedTrelloSettings = TrelloSettings__c.getOrgDefaults();
+        TrelloSettings__c updatedTrelloSettings = TrelloSettings__c.getInstance();
 
         System.assertNotEquals(null, card.id, 'Card is not created');
         System.assertEquals(

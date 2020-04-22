@@ -19,7 +19,7 @@
             </div>
         </div>
         <div align="center">
-            <lightning:button class="slds-m-top_small" variant="brand" type="submit" name="submit" label="Submit"/>
+            <lightning:button class="waves-effect waves-light btn" type="submit" name="submit" label="Submit"/>
         </div>
     </lightning:recordEditForm>
 </aura:component>
