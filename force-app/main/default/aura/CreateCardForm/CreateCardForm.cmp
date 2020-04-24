@@ -1,6 +1,8 @@
 <aura:component>
     <aura:attribute name="fields" type="String[]" default="['Name', 'Assignee__c', 'Due_Date__c', 'Description__c']"/>
     <aura:attribute name="fieldValues" type="Object"/>
+    <aura:attribute name="stateType" type="String" required="true"/>
+    <aura:attribute name="msg" type="String" required="true"/>
 
     <aura:registerEvent name="cardCreated" type="c:CardCreated"/>
 

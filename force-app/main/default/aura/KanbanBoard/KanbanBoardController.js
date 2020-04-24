@@ -25,8 +25,8 @@
         var columnPosition = event.target.getAttribute("data-column");
         var cardCount = document.getElementById(columnPosition).children.length;
         var attributes = { "fieldValues": {
-            "statusName": stageName,
-            "cardPosition": String(cardCount)
+            "statusName" : stageName,
+            "cardPosition" : String(cardCount)
         }};
         var formType = "c:CreateCardForm";
         var headerValue = "New Card";
@@ -45,6 +45,7 @@
     },
 
     onCardCreated: function(component, event, helper) {
+        helper.handleShowToast(component, event.getParam("stateType"),  event.getParam("msg"));
         helper.handleInit(component);
         component.get("v.modalPromise").then(function (modal) {
             modal.close();

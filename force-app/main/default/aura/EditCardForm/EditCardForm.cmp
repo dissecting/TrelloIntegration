@@ -1,5 +1,7 @@
 <aura:component>
     <aura:attribute name="recordId" type="String"/>
+    <aura:attribute name="stateType" type="String" required="true"/>
+    <aura:attribute name="msg" type="String" required="true"/>
 
     <aura:registerEvent name="cardCreated" type="c:CardCreated"/>
 
@@ -10,7 +12,7 @@
         onsuccess="{!c.handleSave}">
         <div class="slds-grid">
             <div class="slds-col slds-size_1-of-2">
-                <lightning:inputField fieldName="Name"/>
+                <lightning:inputField aura:id="nameField" fieldName="Name"/>
                 <lightning:inputField fieldName="Due_Date__c"/>
             </div>
             <div class="slds-col slds-size_1-of-2">

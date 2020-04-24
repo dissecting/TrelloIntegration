@@ -47,7 +47,6 @@ public with sharing class TrelloSyncController {
 
     private static TrelloBoard getBoard() {
         TrelloBoard newBoard = new TrelloBoard();
-        List<Object> boardList = new List<Object>();
         String primaryParameter = 'members';
         String secondaryParameter = 'boards';
         String objectName = 'TrelloBoard';
@@ -55,7 +54,7 @@ public with sharing class TrelloSyncController {
         String boardUrl = TrelloSyncController.getTrelloSettings().get('boardUrl');
         String boardName = TrelloSyncController.getTrelloSettings().get('boardName');
 
-        boardList = TrelloSyncController.sendGetRequest(
+        List<TrelloBoard> boardList = (List<TrelloBoard>) TrelloSyncController.sendGetRequest(
             primaryParameter,
             userName,
             secondaryParameter,
@@ -63,7 +62,7 @@ public with sharing class TrelloSyncController {
         );
 
         if (!boardList.isEmpty()) {
-            for (TrelloBoard currentBoard : (List<TrelloBoard>) boardList) {
+            for (TrelloBoard currentBoard : boardList) {
                 if (currentBoard.url == boardUrl && currentBoard.name == boardName) {
                     newBoard.id = currentBoard.id;
                     newBoard.name = currentBoard.name;
@@ -280,38 +279,38 @@ public with sharing class TrelloSyncController {
         }
     }
 
-    public class TrelloBoard {
-        public String id;
-        public String name;
-        public String url;
+    private class TrelloBoard {
+        private String id;
+        private String name;
+        private String url;
     }
 
-    public class TrelloColumn {
-        public String id;
-        public String name;
-        public String idBoard;
-        public Integer columnPosition;
+    private class TrelloColumn {
+        private String id;
+        private String name;
+        private String idBoard;
+        private Integer columnPosition;
     }
 
-    public class TrelloUser {
-        public String id;
-        public String username;
+    private class TrelloUser {
+        private String id;
+        private String username;
     }
 
-    public class UsersWithColumns {
-        public List<TrelloUser> trelloUserList;
-        public List<TrelloColumn> trelloColumnList;
+    private class UsersWithColumns {
+        private List<TrelloUser> trelloUserList;
+        private List<TrelloColumn> trelloColumnList;
     }
 
-    public class TrelloCard {
-        public String id;
-        public String name;
-        public String descValue;
-        public Datetime due;
-        public String idList;
-        public List<String> idMembers;
-        public String columnName;
-        public List<String> userNames;
-        public Integer columnPosition;
+    private class TrelloCard {
+        private String id;
+        private String name;
+        private String descValue;
+        private Datetime due;
+        private String idList;
+        private List<String> idMembers;
+        private String columnName;
+        private List<String> userNames;
+        private Integer columnPosition;
     }
 }

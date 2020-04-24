@@ -1,1 +1,4 @@
-<aura:event type="APPLICATION" description="Event template"/>
+<aura:event type="APPLICATION" description="Event template">
+    <aura:attribute name="stateType" type="String" required="true" access="public"/>
+    <aura:attribute name="msg" type="String" required="true" access="public"/>
+</aura:event>

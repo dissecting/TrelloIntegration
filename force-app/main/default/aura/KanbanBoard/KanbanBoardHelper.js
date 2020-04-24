@@ -18,7 +18,7 @@
         var actionType = "UpdateStatus";
 
         action.setParams({
-            "status": statusValue,
+            "status" : statusValue,
             "cardIds" : cardIds
         });
 
@@ -115,9 +115,9 @@
         var toastEvent = $A.get("e.force:showToast");
 
         toastEvent.setParams({
-            "title": msgType === "SUCCESS" ? "Success!": "Error!",
-            "type": msgType === "SUCCESS" ? "success": "error",
-            "message": msg
+            "title" : msgType === "SUCCESS" ? "Success!": "Error!",
+            "type" : msgType === "SUCCESS" ? "success": "error",
+            "message" : msg
         });
         toastEvent.fire();
     }
