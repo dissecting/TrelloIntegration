@@ -31,7 +31,6 @@ private class KanbanBoardControllerTest {
 
     @isTest
     private static void testGetTrelloCards() {
-
         TrelloSettings__c trelloSettings = TrelloSettings__c.getInstance();
         List<String> endPointList = new List<String> {
             String.format(trelloSettings.Trello_Sync_Endpoint__c, new List<String> {

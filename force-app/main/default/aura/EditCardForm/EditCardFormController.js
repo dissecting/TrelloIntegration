@@ -4,6 +4,6 @@
     },
 
     handleSave: function(component, event, helper) {
-        $A.get("e.c:CardCreated").fire();
+        $A.get("e.c:cardCreated").fire();
     }
 })
