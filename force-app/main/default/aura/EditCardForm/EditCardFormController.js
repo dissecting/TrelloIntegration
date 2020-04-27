@@ -4,7 +4,7 @@
 
         var nameField = component.find("nameField").get("v.value");
 
-        if (!nameField || !nameField.replace(/\s/g, '').length > 0) {
+        if (!nameField || !nameField.replace(/\s/g, "").length > 0) {
             component.set("v.msg", "Title field should be filled");
             component.set("v.stateType", "ERROR");
         } else {
@@ -12,9 +12,7 @@
             component.set("v.stateType", "SUCCESS");
             component.find("editRecordForm").submit();
         }
-    },
 
-    handleSave: function(component, event, helper) {
         var cardCreatedEvent = $A.get("e.c:cardCreated");
 
         cardCreatedEvent.setParams({

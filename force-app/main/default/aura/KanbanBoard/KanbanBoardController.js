@@ -12,7 +12,7 @@
     },
 
     onCardDetail: function(component, event, helper) {
-        var attributes = { "recordId": event.target.id };
+        var attributes = { "recordId" : event.target.id };
         var formType = "c:CardDetailForm";
         var headerValue = "Card";
         var params = { attributes, formType, headerValue };
@@ -24,7 +24,7 @@
         var stageName = event.target.getAttribute("data-stage");
         var columnPosition = event.target.getAttribute("data-column");
         var cardCount = document.getElementById(columnPosition).children.length;
-        var attributes = { "fieldValues": {
+        var attributes = { "fieldValues" : {
             "statusName" : stageName,
             "cardPosition" : String(cardCount)
         }};
@@ -36,7 +36,7 @@
     },
 
     onEditCard: function(component, event, helper) {
-        var attributes = { "recordId": event.target.id };
+        var attributes = { "recordId" : event.target.id };
         var formType = "c:EditCardForm";
         var headerValue = "Edit Card";
         var params = { attributes, formType, headerValue };
@@ -46,9 +46,12 @@
 
     onCardCreated: function(component, event, helper) {
         helper.handleShowToast(component, event.getParam("stateType"),  event.getParam("msg"));
-        helper.handleInit(component);
-        component.get("v.modalPromise").then(function (modal) {
-            modal.close();
-        });
+
+        if (event.getParam("stateType") == "SUCCESS") {
+            helper.handleInit(component);
+            component.get("v.modalPromise").then(function (modal) {
+                modal.close();
+            });
+        }
     }
 })

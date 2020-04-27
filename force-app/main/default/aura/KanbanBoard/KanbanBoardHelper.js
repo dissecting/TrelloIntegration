@@ -97,13 +97,13 @@
         $A.createComponent(
             params.formType,
             params.attributes,
-           function(content, status) {
-               if (status === "SUCCESS") {
+            function(content, status) {
+                if (status === "SUCCESS") {
                     var modalPromise = component.find("overlayLib").showCustomModal({
                        header: params.headerValue,
                        body: content,
                        showCloseButton: true
-                   });
+                    });
 
                    component.set("v.modalPromise", modalPromise);
                }

@@ -8,8 +8,7 @@
     <lightning:recordEditForm aura:id="editRecordForm"
         objectApiName="Card__c"
         recordId="{!v.recordId}"
-        onsubmit="{!c.handleSubmit}"
-        onsuccess="{!c.handleSave}">
+        onsubmit="{!c.handleSubmit}">
         <div class="slds-grid">
             <div class="slds-col slds-size_1-of-2">
                 <lightning:inputField aura:id="nameField" fieldName="Name"/>
