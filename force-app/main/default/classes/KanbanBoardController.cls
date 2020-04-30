@@ -22,11 +22,15 @@ public with sharing class KanbanBoardController {
             statuses.add(status.Status__c);
         }
 
-        return new KanbanBoard(availableCardList, statuses, syncDateTime.format('MM.dd.yyyy HH:mm:ss'));
+        return new KanbanBoard(
+            availableCardList,
+            statuses,
+            syncDateTime != null ? syncDateTime.format('MM.dd.yyyy HH:mm:ss') : ''
+        );
     }
 
     @AuraEnabled
-    public static void getUpdateStatus(String status, List<String> cardIds) {
+    public static void doUpdateStatus(String status, List<String> cardIds) {
         List<Card__c> cardList = new List<Card__c>();
 
         for (Integer i = 0; i < cardIds.size(); i++) {
@@ -47,7 +51,7 @@ public with sharing class KanbanBoardController {
     }
 
     @AuraEnabled
-    public static void getSync() {
+    public static void doSync() {
         try {
             TrelloSyncController.syncCards();
         } catch (Exception e) {

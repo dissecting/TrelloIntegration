@@ -73,4 +73,50 @@ private class TrelloSyncControllerTest {
             'Sync Date is not updated'
         );
     }
+
+    @isTest
+    private static void testIncorrectRequest() {
+        TrelloSettings__c trelloSettings = TrelloSettings__c.getInstance();
+        List<String> endPointList = new List<String> {
+            String.format(trelloSettings.Trello_Sync_Endpoint__c, new List<String> {
+                'test1',
+                'test2',
+                'test3',
+                'test4',
+                'test5'
+            }),
+            String.format(trelloSettings.Trello_Sync_Endpoint__c, new List<String> {
+                'test1',
+                'test2',
+                'test3',
+                'test4',
+                'test5'
+            }),
+            String.format(trelloSettings.Trello_Sync_Endpoint__c, new List<String> {
+                'test1',
+                'test2',
+                'test3',
+                'test4',
+                'test5'
+            }),
+            String.format(trelloSettings.Trello_Sync_Endpoint__c, new List<String> {
+                'test1',
+                'test2',
+                'test3',
+                'test4',
+                'test5'
+            })
+        };
+
+        Test.setMock(HttpCalloutMock.class, new TrelloSyncCalloutMock(endPointList));
+        Test.startTest();
+
+        try {
+            TrelloSyncController.syncCards();
+        } catch (Exception e) {
+            System.assertNotEquals(null, e.getMessage());
+        }
+
+        Test.stopTest();
+    }
 }

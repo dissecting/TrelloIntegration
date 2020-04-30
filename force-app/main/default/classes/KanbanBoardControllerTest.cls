@@ -14,19 +14,45 @@ private class KanbanBoardControllerTest {
 
         insert newTrelloSettings;
 
-        Card__c newCard = new Card__c(
-            Card_Id__c = 'cardId',
-            Name = 'cardName',
-            Description__c = 'cardDescription',
-            Assignee__c = 'TestUser',
-            Status__c = 'TO DO',
-            Card_Position__c = '0'
-        );
+        List<Card__c> cardList = new List<Card__c> {
+            new Card__c(
+                Card_Id__c = 'cardId1',
+                Name = 'cardName1',
+                Description__c = 'cardDescription',
+                Assignee__c = 'TestUser',
+                Status__c = 'TO DO',
+                Card_Position__c = '0'
+            ),
+            new Card__c(
+                Card_Id__c = 'cardId2',
+                Name = 'cardName2',
+                Description__c = 'cardDescription',
+                Assignee__c = 'TestUser',
+                Status__c = 'In Progress',
+                Card_Position__c = '1'
+            ),
+            new Card__c(
+                Card_Id__c = 'cardId3',
+                Name = 'cardName3',
+                Description__c = 'cardDescription',
+                Assignee__c = 'TestUser',
+                Status__c = 'UAT',
+                Card_Position__c = '2'
+            ),
+            new Card__c(
+                Card_Id__c = 'cardId4',
+                Name = 'cardName4',
+                Description__c = 'cardDescription',
+                Assignee__c = 'TestUser',
+                Status__c = 'Done',
+                Card_Position__c = '3'
+            )
+        };
 
-        insert newCard;
+        insert cardList;
 
         System.assertNotEquals(null, newTrelloSettings.Id, 'Record is not created');
-        System.assertNotEquals(null, newCard.Id, 'Record is not created');
+        System.assertNotEquals(0, cardList.size(), 'Records are not created');
     }
 
     @isTest
@@ -66,12 +92,19 @@ private class KanbanBoardControllerTest {
         Test.setMock(HttpCalloutMock.class, new TrelloSyncCalloutMock(endPointList));
         Test.startTest();
 
-        KanbanBoardController.getSync();
+        KanbanBoardController.doSync();
 
         Test.stopTest();
 
         TrelloSettings__c updatedTrelloSettings = TrelloSettings__c.getInstance();
 
+        Card__c card = [
+            SELECT Name
+            FROM Card__c
+            WHERE Name = '1'
+        ];
+
+        System.assertNotEquals(null, card.id, 'Card is not created');
         System.assertEquals(
             System.now().format('MM/dd/yyyy HH:mm'),
             updatedTrelloSettings.Sync_Date__c.format('MM/dd/yyyy HH:mm'),
@@ -108,7 +141,7 @@ private class KanbanBoardControllerTest {
 
         Test.startTest();
 
-        KanbanBoardController.getUpdateStatus(status, cardIds);
+        KanbanBoardController.doUpdateStatus(status, cardIds);
 
         Test.stopTest();
 

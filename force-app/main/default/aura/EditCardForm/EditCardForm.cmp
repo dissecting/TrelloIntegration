@@ -1,7 +1,7 @@
 <aura:component>
-    <aura:attribute name="recordId" type="String"/>
-    <aura:attribute name="stateType" type="String" required="true"/>
-    <aura:attribute name="msg" type="String" required="true"/>
+    <aura:attribute name="recordId" type="String" access="public"/>
+    <aura:attribute name="stateType" type="String" required="true" access="private"/>
+    <aura:attribute name="msg" type="String" required="true" access="private"/>
 
     <aura:registerEvent name="cardCreated" type="c:CardCreated"/>
 
