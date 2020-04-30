@@ -3,6 +3,7 @@
 	<types>
 		<members>KanbanBoardController</members>
 		<members>KanbanBoardControllerTest</members>
+		<members>TrelloStatusSetting</members>
 		<members>TrelloSyncCalloutMock</members>
 		<members>TrelloSyncController</members>
 		<members>TrelloSyncControllerTest</members>
