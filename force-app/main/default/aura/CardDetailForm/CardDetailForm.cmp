@@ -1,5 +1,5 @@
 <aura:component>
-    <aura:attribute name="recordId" type="String" access="private"/>
+    <aura:attribute name="recordId" type="String" access="public"/>
 
     <lightning:recordViewForm objectApiName="Card__c" recordId="{!v.recordId}">
         <div class="slds-grid">

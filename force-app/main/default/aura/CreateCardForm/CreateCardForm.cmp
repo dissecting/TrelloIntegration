@@ -9,5 +9,6 @@
     <lightning:recordForm aura:id="createRecordForm"
         objectApiName="Card__c"
         fields="{!v.fields}"
-        onsubmit="{!c.handleSubmit}"/>
+        onsubmit="{!c.handleSubmit}"
+        onsuccess="{!c.handleSave}"/>
 </aura:component>
