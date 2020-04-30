@@ -19,10 +19,6 @@
 		<name>AuraDefinitionBundle</name>
 	</types>
 	<types>
-		<members>Trello_Sync_Endpoint</members>
-		<name>CustomLabel</name>
-	</types>
-	<types>
 		<members>*</members>
 		<name>CustomMetadata</name>
 	</types>

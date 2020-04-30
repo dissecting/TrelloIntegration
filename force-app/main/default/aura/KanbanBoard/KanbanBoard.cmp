@@ -4,11 +4,11 @@
                     $Resource.dragula + '/dragula/dragula.css')}"/>
     <ltng:require scripts="{!$Resource.dragula + '/dragula/dragula.js'}"/>
 
-    <aura:attribute name="kanbanData" type="KanbanBoardController.KanbanBoard"/>
-    <aura:attribute name="isSync" type="Boolean" default="false"/>
-    <aura:attribute name="isRendered" type="Boolean" default="false"/>
-    <aura:attribute name="dragula" type="Object"/>
-    <aura:attribute name="modalPromise" type="Aura.Action"/>
+    <aura:attribute name="kanbanData" type="Object" access="private"/>
+    <aura:attribute name="isSync" type="Boolean" default="false" access="private"/>
+    <aura:attribute name="isRendered" type="Boolean" default="false" access="private"/>
+    <aura:attribute name="dragula" type="Object" access="private"/>
+    <aura:attribute name="modalPromise" type="Aura.Action" access="private"/>
 
     <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
     <aura:handler name="render" value="{!this}" action="{!c.onRender}"/>

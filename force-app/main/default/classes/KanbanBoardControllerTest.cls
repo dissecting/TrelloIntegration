@@ -8,7 +8,8 @@ private class KanbanBoardControllerTest {
             Board_Name__c = 'testBoardName',
             Board_URL__c = 'https://test.com/testBoardName',
             Token__c = 'testToken',
-            User_Name__c = 'TestUser'
+            User_Name__c = 'TestUser',
+            Trello_Sync_Endpoint__c = 'https://api.trello.com/1/{0}/{1}/{2}?key={3}&token={4}'
         );
 
         insert newTrelloSettings;
@@ -19,8 +20,7 @@ private class KanbanBoardControllerTest {
             Description__c = 'cardDescription',
             Assignee__c = 'TestUser',
             Status__c = 'TO DO',
-            StatusPosition__c = 0,
-            Card_Position__c = '00'
+            Card_Position__c = '0'
         );
 
         insert newCard;
@@ -31,32 +31,30 @@ private class KanbanBoardControllerTest {
 
     @isTest
     private static void testGetTrelloCards() {
-
-        String endPoint = Label.Trello_Sync_Endpoint;
-        TrelloSettings__c trelloSettings = TrelloSettings__c.getOrgDefaults();
+        TrelloSettings__c trelloSettings = TrelloSettings__c.getInstance();
         List<String> endPointList = new List<String> {
-            String.format(endPoint, new List<String> {
+            String.format(trelloSettings.Trello_Sync_Endpoint__c, new List<String> {
                 'members',
                 trelloSettings.User_Name__c,
                 'boards',
                 trelloSettings.Api_key__c,
                 trelloSettings.Token__c
             }),
-            String.format(endPoint, new List<String> {
+            String.format(trelloSettings.Trello_Sync_Endpoint__c, new List<String> {
                 'boards',
                 'boardId',
                 'lists',
                 trelloSettings.Api_key__c,
                 trelloSettings.Token__c
             }),
-            String.format(endPoint, new List<String> {
+            String.format(trelloSettings.Trello_Sync_Endpoint__c, new List<String> {
                 'boards',
                 'boardId',
                 'members',
                 trelloSettings.Api_key__c,
                 trelloSettings.Token__c
             }),
-            String.format(endPoint, new List<String> {
+            String.format(trelloSettings.Trello_Sync_Endpoint__c, new List<String> {
                 'boards',
                 'boardId',
                 'cards',
@@ -72,7 +70,7 @@ private class KanbanBoardControllerTest {
 
         Test.stopTest();
 
-        TrelloSettings__c updatedTrelloSettings = TrelloSettings__c.getOrgDefaults();
+        TrelloSettings__c updatedTrelloSettings = TrelloSettings__c.getInstance();
 
         System.assertEquals(
             System.now().format('MM/dd/yyyy HH:mm'),
@@ -91,7 +89,7 @@ private class KanbanBoardControllerTest {
         Test.stopTest();
 
         List<Card__c> actualCardList = [
-            SELECT Name, Description__c, Assignee__c, Status__c, StatusPosition__c, Card_Position__c, Card_Id__c
+            SELECT Name, Description__c, Assignee__c, Status__c, Card_Position__c, Card_Id__c
             FROM Card__c
         ];
 
@@ -101,26 +99,24 @@ private class KanbanBoardControllerTest {
     @isTest
     private static void testUpdateStatus() {
         String status = 'UAT';
-        Integer statusPosition = 2;
         List<Card__c> cardList = [
             SELECT Id
             FROM Card__c
         ];
 
-        String cardId = cardList[0].Id;
+        List<String> cardIds = new List<String>(new Map<String, Card__c>(cardList).keySet());
 
         Test.startTest();
 
-        KanbanBoardController.getUpdateStatus(status, statusPosition, cardId);
+        KanbanBoardController.getUpdateStatus(status, cardIds);
 
         Test.stopTest();
 
         List<Card__c> actualCardList = [
-            SELECT Status__c, StatusPosition__c, Card_Position__c
+            SELECT Status__c, Card_Position__c
             FROM Card__c
             WHERE Status__c = :status
-                AND StatusPosition__c = :statusPosition
-                AND Id = :cardId
+                AND Id IN :cardIds
         ];
 
         System.assertEquals(false, actualCardList.isEmpty(), 'Card data is not updated');

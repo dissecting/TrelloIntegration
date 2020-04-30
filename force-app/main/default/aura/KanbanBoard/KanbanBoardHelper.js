@@ -13,14 +13,13 @@
         this.handleCallback(component, action, actionType);
     },
 
-    handleUpdateStatus: function(component, statusValue, position, cardIds) {
+    handleUpdateStatus: function(component, statusValue, cardIds) {
         var action = component.get("c.getUpdateStatus");
         var actionType = "UpdateStatus";
 
         action.setParams({
-            "status": statusValue,
-            "statusPosition": position,
-            "cardIds" : cardIds.join(",")
+            "status" : statusValue,
+            "cardIds" : cardIds
         });
 
         this.handleCallback(component, action, actionType);
@@ -48,7 +47,6 @@
                     self.handleUpdateStatus(
                         component,
                         target.getAttribute("data-status"),
-                        target.id,
                         cardIds
                     );
                 });
@@ -95,17 +93,17 @@
         $A.enqueueAction(action);
     },
 
-    handleShowModal: function(component, params, formType, headerValue) {
+    handleShowModal: function(component, params) {
         $A.createComponent(
-            formType,
-            params,
-           function(content, status) {
-               if (status === "SUCCESS") {
+            params.formType,
+            params.attributes,
+            function(content, status) {
+                if (status === "SUCCESS") {
                     var modalPromise = component.find("overlayLib").showCustomModal({
-                       header: headerValue,
+                       header: params.headerValue,
                        body: content,
                        showCloseButton: true
-                   });
+                    });
 
                    component.set("v.modalPromise", modalPromise);
                }
@@ -117,9 +115,9 @@
         var toastEvent = $A.get("e.force:showToast");
 
         toastEvent.setParams({
-            "title": msgType === "SUCCESS" ? "Success!": "Error!",
-            "type": msgType === "SUCCESS" ? "success": "error",
-            "message": msg
+            "title" : msgType === "SUCCESS" ? "Success!": "Error!",
+            "type" : msgType === "SUCCESS" ? "success": "error",
+            "message" : msg
         });
         toastEvent.fire();
     }

@@ -2,7 +2,7 @@ public with sharing class TrelloSyncController {
 
     private static List<Object> sendGetRequest(String primaryParameter, String primaryValue, String secondaryParameter, String objectName) {
         List<Object> objectList = new List<Object>();
-        String endPoint = Label.Trello_Sync_Endpoint;
+        String endPoint = TrelloSyncController.getTrelloSettings().get('trelloSyncEndpoint');
         String apiKey = TrelloSyncController.getTrelloSettings().get('apiKey');
         String tokenValue = TrelloSyncController.getTrelloSettings().get('tokenValue');
         Http http = new Http();
@@ -47,7 +47,6 @@ public with sharing class TrelloSyncController {
 
     private static TrelloBoard getBoard() {
         TrelloBoard newBoard = new TrelloBoard();
-        List<Object> boardList = new List<Object>();
         String primaryParameter = 'members';
         String secondaryParameter = 'boards';
         String objectName = 'TrelloBoard';
@@ -55,7 +54,7 @@ public with sharing class TrelloSyncController {
         String boardUrl = TrelloSyncController.getTrelloSettings().get('boardUrl');
         String boardName = TrelloSyncController.getTrelloSettings().get('boardName');
 
-        boardList = TrelloSyncController.sendGetRequest(
+        List<TrelloBoard> boardList = (List<TrelloBoard>) TrelloSyncController.sendGetRequest(
             primaryParameter,
             userName,
             secondaryParameter,
@@ -63,7 +62,7 @@ public with sharing class TrelloSyncController {
         );
 
         if (!boardList.isEmpty()) {
-            for (TrelloBoard currentBoard : (List<TrelloBoard>) boardList) {
+            for (TrelloBoard currentBoard : boardList) {
                 if (currentBoard.url == boardUrl && currentBoard.name == boardName) {
                     newBoard.id = currentBoard.id;
                     newBoard.name = currentBoard.name;
@@ -150,11 +149,7 @@ public with sharing class TrelloSyncController {
             );
 
             if (!cardList.isEmpty()) {
-                List<Trello_Status_Setting__mdt> statusList = [
-                    SELECT Position__c, Status__c
-                    FROM Trello_Status_Setting__mdt
-                    ORDER BY Position__c
-                ];
+                List<Trello_Status_Setting__mdt> statusList = TrelloStatusSetting.getTrelloStatusSetting();
 
                 for (Trello_Status_Setting__mdt statusSetting : statusList) {
                     statusNameByPositionMap.put((Integer) statusSetting.Position__c, statusSetting.Status__c);
@@ -200,7 +195,7 @@ public with sharing class TrelloSyncController {
                         cardPosition = 0;
                     }
 
-                    if (!cardIds.contains(cardList[i].id) && cardList[i].columnPosition != null) {
+                    if (!cardIds.contains(cardList[i].id)) {
                         Card__c newCard = new Card__c(
                             Card_Id__c = cardList[i].id,
                             Name = cardList[i].name,
@@ -208,8 +203,7 @@ public with sharing class TrelloSyncController {
                             Assignee__c = String.join(cardList[i].userNames, ', '),
                             Due_Date__c = cardList[i].due,
                             Status__c = cardList[i].columnName,
-                            StatusPosition__c = cardList[i].columnPosition,
-                            Card_Position__c = String.valueOf(cardList[i].columnPosition) + String.valueOf(cardPosition)
+                            Card_Position__c = String.valueOf(cardPosition)
                         );
 
                         cardNewList.add(newCard);
@@ -245,13 +239,14 @@ public with sharing class TrelloSyncController {
 
     private static Map<String, String> getTrelloSettings() {
         Map<String, String> trelloSettingsMap = new Map<String, String>();
-        TrelloSettings__c trelloSettings = TrelloSettings__c.getOrgDefaults();
+        TrelloSettings__c trelloSettings = TrelloSettings__c.getInstance();
         Boolean isTrelloSettings = (trelloSettings != null
             && trelloSettings.Api_key__c != null
             && trelloSettings.Board_Name__c != null
             && trelloSettings.Board_URL__c != null
             && trelloSettings.Token__c != null
             && trelloSettings.User_Name__c != null
+            && trelloSettings.Trello_Sync_Endpoint__c != null
         );
 
         if (isTrelloSettings) {
@@ -260,53 +255,62 @@ public with sharing class TrelloSyncController {
             trelloSettingsMap.put('boardUrl', trelloSettings.Board_URL__c);
             trelloSettingsMap.put('tokenValue', trelloSettings.Token__c);
             trelloSettingsMap.put('userName', trelloSettings.User_Name__c);
+            trelloSettingsMap.put('trelloSyncEndpoint', trelloSettings.Trello_Sync_Endpoint__c);
         }
 
         return trelloSettingsMap;
     }
 
     private static void updateSyncDate() {
-        TrelloSettings__c trelloSettings = TrelloSettings__c.getOrgDefaults();
+        TrelloSettings__c trelloSettings = TrelloSettings__c.getInstance();
 
         if (trelloSettings != null) {
+            Id settingsId = [
+                SELECT Id
+                FROM TrelloSettings__c
+                WHERE Board_Name__c = :trelloSettings.Board_Name__c
+                LIMIT 1
+            ].Id;
+
+            trelloSettings.Id = settingsId;
             trelloSettings.Sync_Date__c = System.now();
 
             update trelloSettings;
         }
     }
 
-    public class TrelloBoard {
-        public String id;
-        public String name;
-        public String url;
+    private class TrelloBoard {
+        private String id;
+        private String name;
+        private String url;
     }
 
-    public class TrelloColumn {
-        public String id;
-        public String name;
-        public String idBoard;
-        public Integer columnPosition;
+    private class TrelloColumn {
+        private String id;
+        private String name;
+        private String idBoard;
+        private Integer columnPosition;
     }
 
-    public class TrelloUser {
-        public String id;
-        public String username;
+    private class TrelloUser {
+        private String id;
+        private String username;
     }
 
-    public class UsersWithColumns {
-        public List<TrelloUser> trelloUserList;
-        public List<TrelloColumn> trelloColumnList;
+    private class UsersWithColumns {
+        private List<TrelloUser> trelloUserList;
+        private List<TrelloColumn> trelloColumnList;
     }
 
-    public class TrelloCard {
-        public String id;
-        public String name;
-        public String descValue;
-        public Datetime due;
-        public String idList;
-        public List<String> idMembers;
-        public String columnName;
-        public List<String> userNames;
-        public Integer columnPosition;
+    private class TrelloCard {
+        private String id;
+        private String name;
+        private String descValue;
+        private Datetime due;
+        private String idList;
+        private List<String> idMembers;
+        private String columnName;
+        private List<String> userNames;
+        private Integer columnPosition;
     }
 }
