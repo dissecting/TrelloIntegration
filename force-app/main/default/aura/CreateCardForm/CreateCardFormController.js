@@ -11,18 +11,15 @@
         if (fields.hasOwnProperty(field) && (!fields.Name || !fields.Name.replace(/\s/g, "").length > 0)) {
             component.set("v.msg", "Title field should be filled");
             component.set("v.stateType", "ERROR");
+            helper.doFireEvent(component, event);
         } else {
             component.set("v.msg", "Card created successfully!");
             component.set("v.stateType", "SUCCESS");
             component.find("createRecordForm").submit(fields);
         }
+    },
 
-        var cardCreatedEvent = $A.get("e.c:cardCreated");
-
-        cardCreatedEvent.setParams({
-            "stateType" : component.get("v.stateType"),
-            "msg" : component.get("v.msg")
-        });
-        cardCreatedEvent.fire();
+    handleSave: function(component, event, helper) {
+        helper.doFireEvent(component, event);
     }
 })

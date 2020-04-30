@@ -40,6 +40,9 @@ public with sharing class TrelloSyncCalloutMock implements HttpCalloutMock {
                 + '"name":"1","idList":"idList1","due":"2022-04-10T12:12:00.000Z",'
                 + '"idMembers":["userId"]}]'
             );
+        } else {
+            response.setStatus('Not Found');
+            response.setStatusCode(404);
         }
 
         return response;

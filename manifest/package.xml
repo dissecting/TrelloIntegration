@@ -23,6 +23,7 @@
 		<name>CustomMetadata</name>
 	</types>
 	<types>
+		<members>Card__c</members>
 		<members>TrelloSettings__c</members>
 		<members>Trello_Status_Setting__mdt</members>
 		<name>CustomObject</name>

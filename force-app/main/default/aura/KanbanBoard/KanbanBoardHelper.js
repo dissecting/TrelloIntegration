@@ -7,14 +7,14 @@
     },
 
     handleSync: function(component) {
-        var action = component.get("c.getSync");
+        var action = component.get("c.doSync");
         var actionType = "Sync";
 
         this.handleCallback(component, action, actionType);
     },
 
     handleUpdateStatus: function(component, statusValue, cardIds) {
-        var action = component.get("c.getUpdateStatus");
+        var action = component.get("c.doUpdateStatus");
         var actionType = "UpdateStatus";
 
         action.setParams({

@@ -2,19 +2,24 @@ public with sharing class TrelloSyncController {
 
     private static List<Object> sendGetRequest(String primaryParameter, String primaryValue, String secondaryParameter, String objectName) {
         List<Object> objectList = new List<Object>();
-        String endPoint = TrelloSyncController.getTrelloSettings().get('trelloSyncEndpoint');
-        String apiKey = TrelloSyncController.getTrelloSettings().get('apiKey');
-        String tokenValue = TrelloSyncController.getTrelloSettings().get('tokenValue');
+        Map<String, String> trelloSettingsMap = TrelloSyncController.getTrelloSettings();
+        String endPoint = trelloSettingsMap.get('trelloSyncEndpoint');
+        String apiKey = trelloSettingsMap.get('apiKey');
+        String tokenValue = trelloSettingsMap.get('tokenValue');
         Http http = new Http();
         HttpRequest request = new HttpRequest();
 
-        request.setEndpoint(String.format(endPoint, new List<String> {
-            primaryParameter,
-            primaryValue,
-            secondaryParameter,
-            apiKey,
-            tokenValue
-        }));
+        try {
+            request.setEndpoint(String.format(endPoint, new List<String> {
+                primaryParameter,
+                primaryValue,
+                secondaryParameter,
+                apiKey,
+                tokenValue
+            }));
+        } catch (Exception e) {
+            throw new IncorrectEndpointException('Endopoint has incorrect format');
+        }
         request.setMethod('GET');
 
         HttpResponse response = http.send(request);
@@ -40,6 +45,8 @@ public with sharing class TrelloSyncController {
                     return objectList;
                 }
             }
+        } else if (response.getStatusCode() != 200) {
+            throw new IncorrectStatusCodeException('Page is Not Found');
         }
 
         return objectList;
@@ -47,12 +54,13 @@ public with sharing class TrelloSyncController {
 
     private static TrelloBoard getBoard() {
         TrelloBoard newBoard = new TrelloBoard();
+        Map<String, String> trelloSettingsMap = TrelloSyncController.getTrelloSettings();
         String primaryParameter = 'members';
         String secondaryParameter = 'boards';
         String objectName = 'TrelloBoard';
-        String userName = TrelloSyncController.getTrelloSettings().get('userName');
-        String boardUrl = TrelloSyncController.getTrelloSettings().get('boardUrl');
-        String boardName = TrelloSyncController.getTrelloSettings().get('boardName');
+        String userName = trelloSettingsMap.get('userName');
+        String boardUrl = trelloSettingsMap.get('boardUrl');
+        String boardName = trelloSettingsMap.get('boardName');
 
         List<TrelloBoard> boardList = (List<TrelloBoard>) TrelloSyncController.sendGetRequest(
             primaryParameter,
@@ -256,6 +264,8 @@ public with sharing class TrelloSyncController {
             trelloSettingsMap.put('tokenValue', trelloSettings.Token__c);
             trelloSettingsMap.put('userName', trelloSettings.User_Name__c);
             trelloSettingsMap.put('trelloSyncEndpoint', trelloSettings.Trello_Sync_Endpoint__c);
+        } else {
+            throw new NoSettingsException('No Settings');
         }
 
         return trelloSettingsMap;
@@ -313,4 +323,10 @@ public with sharing class TrelloSyncController {
         private List<String> userNames;
         private Integer columnPosition;
     }
+
+    private class IncorrectStatusCodeException extends Exception {}
+
+    private class NoSettingsException extends Exception {}
+
+    private class IncorrectEndpointException extends Exception {}
 }
