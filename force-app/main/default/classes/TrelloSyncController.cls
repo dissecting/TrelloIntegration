@@ -88,7 +88,6 @@ public with sharing class TrelloSyncController {
         String primaryParameter = 'boards';
         String secondaryParameter = 'lists';
         String objectName = 'TrelloColumn';
-        Integer columnPosition = 0;
 
         if (trelloBoard.id != null) {
             columnList = (List<TrelloColumn>) TrelloSyncController.sendGetRequest(
@@ -97,11 +96,6 @@ public with sharing class TrelloSyncController {
                 secondaryParameter,
                 objectName
             );
-
-            for (TrelloColumn currentColumn : columnList) {
-                currentColumn.columnPosition = columnPosition;
-                columnPosition++;
-            }
         }
 
         return columnList;
@@ -134,9 +128,6 @@ public with sharing class TrelloSyncController {
         UsersWithColumns usersWithColumns = TrelloSyncController.getUsersWithColumns();
 
         Map<String, String> columnNameByIdMap = new Map<String, String>();
-        Map<String, Integer> columnPositionByIdMap = new Map<String, Integer>();
-        Map<Integer, String> statusNameByPositionMap = new Map<Integer, String>();
-        Map<String, Integer> statusPositionByNameMap = new Map<String, Integer>();
         Map<String, String> userNameByIdMap = new Map<String, String>();
 
         List<TrelloCard> cardList = new List<TrelloCard>();
@@ -157,16 +148,8 @@ public with sharing class TrelloSyncController {
             );
 
             if (!cardList.isEmpty()) {
-                List<Trello_Status_Setting__mdt> statusList = TrelloStatusSetting.getTrelloStatusSetting();
-
-                for (Trello_Status_Setting__mdt statusSetting : statusList) {
-                    statusNameByPositionMap.put((Integer) statusSetting.Position__c, statusSetting.Status__c);
-                    statusPositionByNameMap.put(statusSetting.Status__c, (Integer) statusSetting.Position__c);
-                }
-
                 for (TrelloColumn currentColumn : usersWithColumns.trelloColumnList) {
                     columnNameByIdMap.put(currentColumn.id, currentColumn.name);
-                    columnPositionByIdMap.put(currentColumn.id, currentColumn.columnPosition);
                 }
 
                 for (TrelloUser currentUser : usersWithColumns.trelloUserList) {
@@ -174,24 +157,6 @@ public with sharing class TrelloSyncController {
                 }
 
                 for (Integer i = 0; i < cardList.size(); i++) {
-                    if (!statusNameByPositionMap.isEmpty()) {
-                        Boolean isEqualPositions = (
-                            statusNameByPositionMap.get(columnPositionByIdMap.get(cardList[i].idList)) ==
-                            columnNameByIdMap.get(cardList[i].idList)
-                        );
-
-                        if (isEqualPositions) {
-                            cardList[i].columnPosition = columnPositionByIdMap.get(cardList[i].idList);
-                        } else {
-                            cardList[i].columnPosition = statusPositionByNameMap.get(
-                                columnNameByIdMap.get(cardList[i].idList)
-                            );
-                        }
-
-                    } else {
-                        cardList[i].columnPosition = columnPositionByIdMap.get(cardList[i].idList);
-                    }
-
                     cardList[i].columnName = columnNameByIdMap.get(cardList[i].idList);
                     cardList[i].userNames = new List<String>();
 
@@ -199,7 +164,7 @@ public with sharing class TrelloSyncController {
                         cardList[i].userNames.add(userNameByIdMap.get(userId));
                     }
 
-                    if (i != 0 && (cardList[i].columnPosition != cardList[i-1].columnPosition)) {
+                    if (i != 0 && (cardList[i].idList != cardList[i-1].idList)) {
                         cardPosition = 0;
                     }
 
@@ -299,7 +264,6 @@ public with sharing class TrelloSyncController {
         private String id;
         private String name;
         private String idBoard;
-        private Integer columnPosition;
     }
 
     private class TrelloUser {
@@ -321,7 +285,6 @@ public with sharing class TrelloSyncController {
         private List<String> idMembers;
         private String columnName;
         private List<String> userNames;
-        private Integer columnPosition;
     }
 
     private class IncorrectStatusCodeException extends Exception {}
