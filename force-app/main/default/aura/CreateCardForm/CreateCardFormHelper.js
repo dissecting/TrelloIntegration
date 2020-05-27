@@ -1,6 +1,6 @@
 ({
     doFireEvent: function(component, event) {
-        var cardCreatedEvent = $A.get("e.c:cardCreated");
+        var cardCreatedEvent = $A.get("e.c:CardCreated");
 
         cardCreatedEvent.setParams({
             "stateType" : component.get("v.stateType"),
