@@ -18,7 +18,7 @@ public with sharing class TrelloSyncController {
                 tokenValue
             }));
         } catch (Exception e) {
-            throw new IncorrectEndpointException('Endopoint has incorrect format');
+            throw new IncorrectEndpointException('Endpoint has incorrect format');
         }
         request.setMethod('GET');
 
